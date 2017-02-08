@@ -47,7 +47,10 @@ namespace Xamarin.Forms.Xaml
 			var source = Values [parentNode];
 
 			XmlName propertyName;
-			if (TryGetPropertyName(node, parentNode, out propertyName)) {
+			if (TryGetPropertyName(node, parentNode, out propertyName))
+			{
+				if (TrySetRuntimeName(propertyName, source, value, node))
+					return;
 				if (Skips.Contains(propertyName))
 					return;
 				if (parentElement.SkipProperties.Contains(propertyName))
@@ -118,7 +121,8 @@ namespace Xamarin.Forms.Xaml
 
 				var source = Values [parentNode];
 				SetPropertyValue(source, propertyName, value, Context.RootElement, node, Context, node);
-			} else if (IsCollectionItem(node, parentNode) && parentNode is IElementNode) {
+			}
+			else if (IsCollectionItem(node, parentNode) && parentNode is IElementNode) {
 				// Collection element, implicit content, or implicit collection element.
 				string contentProperty;
 				if (typeof(IEnumerable).GetTypeInfo().IsAssignableFrom(Context.Types [parentElement].GetTypeInfo()) && Context.Types[parentElement].GetRuntimeMethods().Any(mi => mi.Name == "Add" && mi.GetParameters().Length == 1)) {
@@ -200,6 +204,19 @@ namespace Xamarin.Forms.Xaml
 				return true;
 			}
 			return false;
+		}
+
+		bool TrySetRuntimeName(XmlName propertyName, object source, object value, ValueNode node)
+		{
+			if (propertyName != XmlName.xName)
+				return false;
+
+			var runTimeName = source.GetType().GetTypeInfo().GetCustomAttribute<RuntimeNamePropertyAttribute>();
+			if (runTimeName == null)
+				return false;
+
+			SetPropertyValue(source, new XmlName("", runTimeName.Name), value, Context.RootElement, node, Context, node);
+			return true;
 		}
 
 		static bool IsCollectionItem(INode node, INode parentNode)
@@ -292,7 +309,7 @@ namespace Xamarin.Forms.Xaml
 			if (xpe == null && TrySetBinding(xamlelement, property, localName, value, lineInfo, out xpe))
 				return;
 
-			//If it's a BindableProberty, SetValue
+			//If it's a BindableProperty, SetValue
 			if (xpe == null && TrySetValue(xamlelement, property, attached, value, lineInfo, serviceProvider, out xpe))
 				return;
 
@@ -304,7 +321,7 @@ namespace Xamarin.Forms.Xaml
 			if (xpe == null && TryAddToProperty(xamlelement, localName, value, lineInfo, serviceProvider, out xpe))
 				return;
 
-			xpe = xpe ?? new XamlParseException($"Cannot assign property \"{localName}\": Property does not exists, or is not assignable, or mismatching type between value and property", lineInfo);
+			xpe = xpe ?? new XamlParseException($"Cannot assign property \"{localName}\": Property does not exist, or is not assignable, or mismatching type between value and property", lineInfo);
 			if (context.DoNotThrowOnExceptions)
 				System.Diagnostics.Debug.WriteLine(xpe.Message);
 			else
@@ -413,6 +430,21 @@ namespace Xamarin.Forms.Xaml
 					bindable.SetValue(property, convertedValue);
 					return true;
 				}
+
+				if (property.ReturnTypeInfo.GenericTypeArguments.Length > 0 && property.ReturnTypeInfo.GenericTypeArguments[0].IsInstanceOfType(convertedValue))
+				{
+					// This might be a collection we can add to
+					var addMethod = property.ReturnType.GetRuntimeMethods().FirstOrDefault(mi => mi.Name == "Add" && mi.GetParameters().Length == 1);
+					if (addMethod == null)
+						return false;
+
+					var collection = bindable.EnsureCollectionInitialized(property);
+
+					// Now add convertedValue to it
+					addMethod.Invoke(collection, new[] { value.ConvertTo(addMethod.GetParameters()[0].ParameterType, (Func<TypeConverter>)null, serviceProvider) });
+					return true;
+				}
+
 				return false;
 			}
 
@@ -421,6 +453,35 @@ namespace Xamarin.Forms.Xaml
 
 			exception = new XamlParseException($"{elementType.Name} is not a BindableObject or does not support setting native BindableProperties", lineInfo);
 			return false;
+		}
+
+		static bool TrySetterValueCollection(object element, object value)
+		{
+			var setter = element as Setter;
+
+			// The element must be a Setter 
+			var targetProperty = setter?.Property;
+			
+			// and must already have Property established
+			if (targetProperty == null)
+				return false;
+
+			// Is value's type assignable to Property's type?
+			if (value.GetType().IsInstanceOfType(targetProperty.ReturnType))
+				return false;
+
+			var genericArgs = targetProperty.ReturnTypeInfo.GenericTypeArguments;
+
+			// Is this a generic collection of value's type?
+			if (genericArgs.Length != 1 || !genericArgs[0].IsInstanceOfType(value))
+				return false;
+
+			// If the collection hasn't already been created, do so
+			if (setter.Value == null)
+				setter.Value = Activator.CreateInstance(targetProperty.ReturnType);
+
+			// Fall through to Add/TryAdd
+			return true;
 		}
 
 		static bool TrySetProperty(object element, string localName, object value, IXmlLineInfo lineInfo, XamlServiceProvider serviceProvider, HydratationContext context, out Exception exception)
@@ -438,6 +499,9 @@ namespace Xamarin.Forms.Xaml
 
 			object convertedValue = value.ConvertTo(propertyInfo.PropertyType, () => propertyInfo, serviceProvider);
 			if (convertedValue != null && !propertyInfo.PropertyType.IsInstanceOfType(convertedValue))
+				return false;
+
+			if (TrySetterValueCollection(element, convertedValue))
 				return false;
 
 			setter.Invoke(element, new object [] { convertedValue });
@@ -495,6 +559,39 @@ namespace Xamarin.Forms.Xaml
 				cnode.Accept(new ApplyPropertiesVisitor(context, true), null);
 				return context.Values [cnode];
 			};
+		}
+	}
+
+	public static class CollectionExtensions
+	{
+		public static object EnsureCollectionInitialized(this BindableObject bindable, BindableProperty property)
+		{
+			// Retrieve the value
+			var propertyValue = bindable.GetValue(property);
+
+			// If it's not initialized, create it
+			if (propertyValue == null)
+			{
+				propertyValue = Activator.CreateInstance(property.ReturnType);
+				bindable.SetValue(property, propertyValue);
+			}
+
+			return propertyValue;
+		}
+
+		public static object EnsureCollectionInitialized(this Setter setter)
+		{
+			// Retrieve the value
+			var propertyValue = setter.Value;
+
+			// If it's not initialized, create it
+			if (propertyValue == null)
+			{
+				propertyValue = Activator.CreateInstance(setter.Property.ReturnType);
+				setter.Value = propertyValue;
+			}
+
+			return propertyValue;
 		}
 	}
 }

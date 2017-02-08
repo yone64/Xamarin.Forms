@@ -49,6 +49,7 @@ namespace Xamarin.Forms.Platform.WinRT
 		{
 			TextChanged += OnTextChanged;
 			SelectionChanged += OnSelectionChanged;
+			IsEnabledChanged += OnIsEnabledChanged;
 		}
 
 		public Brush BackgroundFocusBrush
@@ -328,6 +329,30 @@ namespace Xamarin.Forms.Platform.WinRT
 				InputScope = _cachedInputScope;
 				IsSpellCheckEnabled = _cachedSpellCheckSetting;
 				IsTextPredictionEnabled = _cachedPredictionsSetting;
+			}
+		}
+
+		public bool DeferToNativeVsm = true;
+		
+		//protected override bool GoToElementStateCore(string stateName, bool useTransitions)
+		//{
+		//	if (DeferToNativeVsm == true)
+		//	{
+		//		return base.GoToElementStateCore(stateName, useTransitions);
+		//	}
+
+		//	return base.GoToElementStateCore("Forms" + stateName, true);
+		//}
+
+		void OnIsEnabledChanged(object sender, DependencyPropertyChangedEventArgs dependencyPropertyChangedEventArgs)
+		{
+			// Normally the FormsVisualStateManager would handle this, but for some reason it doesn't seem to work with TextBox,
+			// so we have to handle all these state changes manually
+			var isEnabled = (bool)dependencyPropertyChangedEventArgs.NewValue;
+
+			if (DeferToNativeVsm)
+			{
+				Windows.UI.Xaml.VisualStateManager.GoToState(sender as Control, isEnabled ? "FormsNormal" : "FormsDisabled", true);
 			}
 		}
 	}
