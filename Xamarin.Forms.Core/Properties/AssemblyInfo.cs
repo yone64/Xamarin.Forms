@@ -2,6 +2,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using Xamarin.Forms;
 using Xamarin.Forms.Internals;
+using Xamarin.Forms.StyleSheets;
 
 [assembly: AssemblyTitle("Xamarin.Forms.Core")]
 [assembly: AssemblyDescription("")]
@@ -60,3 +61,6 @@ using Xamarin.Forms.Internals;
 [assembly: Preserve]
 
 [assembly: XmlnsDefinition("http://xamarin.com/schemas/2014/forms", "Xamarin.Forms")]
+
+[assembly: StyleProperty("color", typeof(ITextElement), nameof(TextElement.TextColorProperty))]
+[assembly: StyleProperty("background-color", typeof(VisualElement), nameof(VisualElement.BackgroundColorProperty))]

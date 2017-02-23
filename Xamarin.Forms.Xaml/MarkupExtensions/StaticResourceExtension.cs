@@ -1,11 +1,40 @@
-using System;
+﻿using System;
 using System.Reflection;
 using System.Xml;
 using System.Linq;
+using System.IO;
 using Xamarin.Forms.Internals;
+using Xamarin.Forms.Xaml.Internals;
 
 namespace Xamarin.Forms.Xaml
 {
+	[ContentProperty("Path")]
+	public sealed class StyleSheetExtension : IMarkupExtension
+	{
+		public string Path { get; set; }
+
+		public object ProvideValue(IServiceProvider serviceProvider)
+		{
+			if (serviceProvider == null)
+				throw new ArgumentNullException(nameof(serviceProvider));
+			if (Path == null)
+				throw new XamlParseException("you must specify a key in {StaticResource}",
+											 (serviceProvider.GetService(typeof(IXmlLineInfoProvider)) as IXmlLineInfoProvider)?.XmlLineInfo);
+
+			var currentAssemblyProvider = serviceProvider.GetService(typeof(ICurrentAssemblyProvider)) as ICurrentAssemblyProvider;
+			if (currentAssemblyProvider == null)
+				throw new ArgumentException();
+
+			var asm = currentAssemblyProvider.CurrentAssembly;
+			using (var stream = asm.GetManifestResourceStream(Path))
+			using (var reader = new StreamReader(stream)) {
+				var css = reader.ReadToEnd();
+				var alternateCss = ResourceLoader.ResourceProvider?.Invoke(Path);
+				return alternateCss ?? css;
+			}
+		}
+	}
+
 	[ContentProperty("Key")]
 	public sealed class StaticResourceExtension : IMarkupExtension
 	{

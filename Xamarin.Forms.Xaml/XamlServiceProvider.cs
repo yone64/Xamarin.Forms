@@ -15,8 +15,6 @@ namespace Xamarin.Forms.Xaml.Internals
 			object targetObject;
 			if (node != null && node.Parent != null && context.Values.TryGetValue(node.Parent, out targetObject))
 				IProvideValueTarget = new XamlValueTargetProvider(targetObject, node, context, null);
-			if (context != null)
-				IRootObjectProvider = new XamlRootObjectProvider(context.RootElement);
 			if (node != null)
 			{
 				IXamlTypeResolver = new XamlTypeResolver(node.NamespaceResolver, XamlParser.GetElementType,
@@ -34,6 +32,9 @@ namespace Xamarin.Forms.Xaml.Internals
 				IXmlLineInfoProvider = new XmlLineInfoProvider(xmlLineInfo);
 
 			IValueConverterProvider = new ValueConverterProvider();
+
+			if (context != null)
+				services[typeof(ICurrentAssemblyProvider)] = new CurrentAssemblyProvider(context.RootElement.GetType().GetTypeInfo().Assembly);
 		}
 
 		public XamlServiceProvider()
@@ -51,12 +52,6 @@ namespace Xamarin.Forms.Xaml.Internals
 		{
 			get { return (IXamlTypeResolver)GetService(typeof (IXamlTypeResolver)); }
 			set { services[typeof (IXamlTypeResolver)] = value; }
-		}
-
-		internal IRootObjectProvider IRootObjectProvider
-		{
-			get { return (IRootObjectProvider)GetService(typeof (IRootObjectProvider)); }
-			set { services[typeof (IRootObjectProvider)] = value; }
 		}
 
 		internal IXmlLineInfoProvider IXmlLineInfoProvider
@@ -250,16 +245,6 @@ namespace Xamarin.Forms.Xaml.Internals
 			XmlType xmlType, IXmlLineInfo xmlInfo, Assembly currentAssembly, out XamlParseException exception);
 	}
 
-	class XamlRootObjectProvider : IRootObjectProvider
-	{
-		public XamlRootObjectProvider(object rootObject)
-		{
-			RootObject = rootObject;
-		}
-
-		public object RootObject { get; }
-	}
-
 	public class XmlLineInfoProvider : IXmlLineInfoProvider
 	{
 		public XmlLineInfoProvider(IXmlLineInfo xmlLineInfo)
@@ -278,6 +263,11 @@ namespace Xamarin.Forms.Xaml.Internals
 	public class NameScopeProvider : INameScopeProvider
 	{
 		public INameScope NameScope { get; set; }
+	}
+
+	interface ICurrentAssemblyProvider
+	{
+		Assembly CurrentAssembly { get; }
 	}
 
 	public class XmlNamespaceResolver : IXmlNamespaceResolver
@@ -306,5 +296,14 @@ namespace Xamarin.Forms.Xaml.Internals
 		{
 			namespaces.Add(prefix, ns);
 		}
+	}
+
+	public class CurrentAssemblyProvider : ICurrentAssemblyProvider
+	{
+		public CurrentAssemblyProvider(Assembly currentAssembly)
+		{
+			CurrentAssembly = currentAssembly;
+		}
+		public Assembly CurrentAssembly { get; set; }
 	}
 }

@@ -109,4 +109,19 @@
 			DebugType = "$(DebugType)"
 			KeepXamlResources = "$(XFKeepXamlResources)" />
 	</Target>
+
+	<PropertyGroup>
+		<PrepareResourcesDependsOn>
+			RenameCss;
+			$(PrepareResourcesDependsOn)
+		</PrepareResourcesDependsOn>
+	</PropertyGroup>
+
+	<Target Name="RenameCss">
+		<ItemGroup>
+			<EmbeddedResource Condition="'%(Extension)' == '.css'" >
+				<LogicalName>%(EmbeddedResource.RelativeDir)%(EmbeddedResource.Filename)%(EmbeddedResource.Extension)</LogicalName>
+			</EmbeddedResource>
+		</ItemGroup>
+	</Target>
 </Project>

@@ -457,6 +457,19 @@ namespace Xamarin.Forms.Build.Tasks
 
 			yield return Instruction.Create(OpCodes.Newobj, ctor);
 
+			//Add a CurrentAssemblyProvider
+			{
+				yield return Instruction.Create(OpCodes.Dup); //Dupicate the serviceProvider
+				yield return Instruction.Create(OpCodes.Ldtoken, module.ImportReference(typeof(ICurrentAssemblyProvider)));
+				yield return Instruction.Create(OpCodes.Call, module.ImportReference(getTypeFromHandle));
+				var currentAssemblyproviderCtor = module.ImportReference(typeof(CurrentAssemblyProvider).GetConstructor(new []{ typeof(System.Reflection.Assembly) }));
+				//call class [mscorlib]System.Reflection.Assembly class [mscorlib]System.Reflection.Assembly::GetExecutingAssembly()
+				var getExecutingAssembly = module.ImportReference(typeof(System.Reflection.Assembly).GetMethod("GetExecutingAssembly"));
+				yield return Instruction.Create(OpCodes.Call, getExecutingAssembly);
+				yield return Instruction.Create(OpCodes.Newobj, currentAssemblyproviderCtor);
+				yield return Instruction.Create(OpCodes.Callvirt, addService);
+			}
+
 			//Add a SimpleValueTargetProvider
 			var pushParentIl = node.PushParentObjectsArray(context).ToList();
 			if (pushParentIl[pushParentIl.Count - 1].OpCode != OpCodes.Ldnull)

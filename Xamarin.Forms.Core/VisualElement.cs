@@ -616,6 +616,7 @@ namespace Xamarin.Forms
 				NavigationProxy.Inner = null;
 			}
 #pragma warning restore 0618
+			ApplyStyleSheetOnParentSet();
 		}
 
 		protected virtual void OnSizeAllocated(double width, double height)

@@ -36,8 +36,6 @@ namespace Xamarin.Forms.Xaml.UnitTests
 				result += targetValueProvider != null;
 				var xamlType = serviceProvider.GetService (typeof(IXamlTypeResolver));
 				result += xamlType != null;
-				var rootObject = serviceProvider.GetService (typeof(IRootObjectProvider));
-				result += rootObject != null;
 			}
 			return result;
 		}
@@ -132,13 +130,12 @@ namespace Xamarin.Forms.Xaml.UnitTests
 			var serviceProvider = new Internals.XamlServiceProvider (null, null) {
 				IProvideValueTarget = new Internals.XamlValueTargetProvider (null, null, null, null),
 				IXamlTypeResolver = typeResolver,
-				IRootObjectProvider = new Internals.XamlRootObjectProvider(null),
 			};
 
 			var result = (new MarkupExtensionParser ()).ParseExpression (ref markupString, serviceProvider);
 
 			Assert.That (result, Is.InstanceOf<string> ());
-			Assert.AreEqual ("TrueTrueTrue", result);
+			Assert.AreEqual ("TrueTrue", result);
 		}
 
 		[Test]
