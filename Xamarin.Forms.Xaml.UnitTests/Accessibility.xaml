@@ -9,7 +9,7 @@
 			Accessibility.Name="Name"
 			Accessibility.Hint="Sets your name"
 			Accessibility.IsInAccessibleTree="true"
-			Accessibility.LabeledBy="{x:Reference label}"
+			Accessibility.LabeledBy="label"
 		 />
 	</StackLayout>
 

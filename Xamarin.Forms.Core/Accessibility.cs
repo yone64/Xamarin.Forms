@@ -21,6 +21,7 @@ namespace Xamarin.Forms
 			return (bool?)bindable.GetValue(IsInAccessibleTreeProperty);
 		}
 
+		[TypeConverter(typeof(ReferenceTypeConverter))]
 		public static VisualElement GetLabeledBy(BindableObject bindable)
 		{
 			return (VisualElement)bindable.GetValue(LabeledByProperty);
