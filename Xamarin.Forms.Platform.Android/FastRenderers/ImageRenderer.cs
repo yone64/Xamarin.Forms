@@ -1,6 +1,9 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Threading.Tasks;
+using Android.Graphics;
+using Android.Graphics.Drawables;
 using AImageView = Android.Widget.ImageView;
 using AView = Android.Views.View;
 using Android.Views;
@@ -74,7 +77,7 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
             return handled ? result : base.OnTouchEvent(e);
         }
 
-        protected virtual Size MinimumSize()
+		protected virtual Size MinimumSize()
 		{
 			return new Size();
 		}
@@ -151,6 +154,7 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 
 		public ImageRenderer() : base(Forms.Context)
 		{
+			
 		}
 
 		protected virtual async void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -161,6 +165,12 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 				UpdateAspect();
 
 			ElementPropertyChanged?.Invoke(this, e);
+		}
+
+		public override void Layout(int l, int t, int r, int b)
+		{
+			base.Layout(l, t, r, b);
+			ShrinkToAspect();
 		}
 
 		protected virtual async Task TryUpdateBitmap(Image previous = null)
@@ -202,6 +212,80 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 
 			ScaleType type = _element.Aspect.ToScaleType();
 			SetScaleType(type);
+		}
+
+		// TODO hartez 2017/05/16 17:42:14 Clean this up if you can come up with reasonable iOS and Windows implementations	
+		void ShrinkToAspect()
+		{
+			if (_element == null || _element.Aspect != Aspect.AspectFit
+				|| _element.HeightRequest > -1 || _element.WidthRequest > -1
+				|| _element.Height < 1 || _element.Width < 1)
+			{
+				return;
+			}
+
+			var size = GetBitmapDisplaySize(this);
+
+			if (size.Item1 <= 0 || size.Item2 <= 0)
+			{
+				return;
+			}
+
+			//Debug.WriteLine($">>>>> ImageRenderer Shrink 185: Width = {size.Item1}, Height = {size.Item2}");
+
+			//Debug.WriteLine($">>>>> ImageRenderer Shrink 196: _element.Width = {_element.Width}, _element.Height = {_element.Height}");
+			//Debug.WriteLine($">>>>> ImageRenderer Shrink 197: _element.WidthRequest = {_element.WidthRequest}, _element.HeightRequest = {_element.HeightRequest}");
+
+			var sizeViaContextFromPixels = new Tuple<double, double>(this.Context.FromPixels(size.Item1), this.Context.FromPixels(size.Item2));
+
+			//	Debug.WriteLine($">>>>> ImageRenderer Shrink 201: (ContextFromPixels version): Width = {sizeViaContextFromPixels.Item1}, Height = {sizeViaContextFromPixels.Item2}");
+
+			const double tolerance = 2;
+
+			var heightDelta = _element.Height - sizeViaContextFromPixels.Item2;
+
+			if (heightDelta > tolerance)
+			{
+				Debug.WriteLine($">>>>> ImageRenderer ShrinkToAspect 211: Resizing because of height delta");
+				_element.HeightRequest = sizeViaContextFromPixels.Item2;
+				_element.InvalidateMeasureNonVirtual(InvalidationTrigger.SizeRequestChanged);
+				return;
+			}
+
+			var widthDelta = _element.Width - sizeViaContextFromPixels.Item1;
+
+			if (widthDelta > tolerance)
+			{
+				Debug.WriteLine($">>>>> ImageRenderer ShrinkToAspect 220: Resizing because of width delta");
+				_element.WidthRequest = sizeViaContextFromPixels.Item1;
+				_element.InvalidateMeasureNonVirtual(InvalidationTrigger.SizeRequestChanged);
+			}
+		}
+
+		public static Tuple<int, int> GetBitmapDisplaySize(AImageView imageView)
+		{
+			if (imageView?.Drawable == null)
+				return new Tuple<int, int>(0, 0);
+
+			// Get image dimensions
+			// Get image matrix values and place them in an array
+			float[] f = new float[9];
+			imageView.ImageMatrix.GetValues(f);
+
+			// Extract the scale values using the constants (if aspect ratio maintained, scaleX == scaleY)
+			float scaleX = f[Matrix.MscaleX];
+			float scaleY = f[Matrix.MscaleY];
+
+			// Get the drawable (could also get the bitmap behind the drawable and getWidth/getHeight)
+			Drawable d = imageView.Drawable;
+			int origW = d.IntrinsicWidth;
+			int origH = d.IntrinsicHeight;
+
+			// Calculate the actual dimensions
+			int actW = (int)Math.Round(origW * scaleX);
+			int actH = (int)Math.Round(origH * scaleY);
+
+			return new Tuple<int, int>(actW, actH);
 		}
 	}
 }
