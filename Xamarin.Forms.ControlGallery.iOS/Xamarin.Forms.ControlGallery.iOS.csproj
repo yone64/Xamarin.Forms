@@ -202,6 +202,8 @@
   <ItemGroup>
     <Content Include="bank%402x.png" />
     <Content Include="bank.png" />
+    <BundleResource Include="blue.jpg" />
+    <BundleResource Include="brown.jpg" />
     <Content Include="calculator%402x.png" />
     <Content Include="calculator.png" />
     <BundleResource Include="caret_r.png" />
@@ -214,6 +216,7 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Goobuntu-icon.png" />
+    <BundleResource Include="green.jpg" />
     <Content Include="Intranet-icon.png" />
     <BundleResource Include="Default%402x.png" />
     <BundleResource Include="local.html" />
@@ -221,6 +224,8 @@
     <BundleResource Include="oasissmall.jpg" />
     <Content Include="coffee%402x.png" />
     <BundleResource Include="Resources\invalidimage.jpg" />
+    <BundleResource Include="red.jpg" />
+    <BundleResource Include="purple.jpg" />
     <Content Include="settings%402x.png" />
     <Content Include="menuIcon%402x.png" />
     <Content Include="crimsonsmall.jpg" />
@@ -296,6 +301,7 @@
     <BundleResource Include="Resources\twitternav%402x.png" />
     <BundleResource Include="Resources\xamarinlogo.png" />
     <BundleResource Include="coffee.png" />
+    <BundleResource Include="yellow.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="AdvancedColorPicker, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">

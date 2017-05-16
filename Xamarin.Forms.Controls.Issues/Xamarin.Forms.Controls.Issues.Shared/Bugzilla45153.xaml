@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<controls:TestContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Xamarin.Forms.Controls;assembly=Xamarin.Forms.Core.Android.UITests"
+             x:Class="Xamarin.Forms.Controls.Issues.Bugzilla45153">
+    <ContentPage.Padding>
+        <OnPlatform x:TypeArguments="Thickness" iOS="0, 20, 0, 0" />
+    </ContentPage.Padding>
+
+    <ContentPage.Content>
+
+        <ScrollView Orientation="Vertical" HorizontalOptions="Fill">
+
+            <Grid  x:Name="ImageGrid" ColumnSpacing="5" RowSpacing="2" Padding="5,0,5,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition  Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+
+                </Grid.RowDefinitions>
+
+                <Image Source="red.jpg"  Aspect="AspectFit" Grid.Column="0" Grid.Row="0" BackgroundColor="Aqua"/>
+                <Image Source="blue.jpg" Aspect="AspectFit" Grid.Column="1" Grid.Row="0"  BackgroundColor="Aqua"/>
+                <Image Source="green.jpg" Aspect="AspectFit" Grid.Column="0" Grid.Row="1" BackgroundColor="Aqua" />
+                <Image Source="brown.jpg" Aspect="AspectFit" Grid.Column="1" Grid.Row="1" BackgroundColor="Aqua" />
+                <Image Source="purple.jpg" Aspect="AspectFit" Grid.Column="0" Grid.Row="2" BackgroundColor="Aqua" />
+                <Image Source="yellow.jpg" Aspect="AspectFit" Grid.Column="1" Grid.Row="2" BackgroundColor="Aqua" />
+
+            </Grid>
+        </ScrollView>
+
+    </ContentPage.Content>
+
+</controls:TestContentPage>
