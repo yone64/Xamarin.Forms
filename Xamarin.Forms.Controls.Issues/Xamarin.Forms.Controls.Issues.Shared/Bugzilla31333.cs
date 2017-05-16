@@ -126,7 +126,8 @@ namespace Xamarin.Forms.Controls.Issues
 			{
 				var control = (T)Activator.CreateInstance (typeof(T));
 				control.SetBinding ();
-				control.HorizontalOptions = LayoutOptions.FillAndExpand;
+				control.HorizontalOptions = LayoutOptions.Fill;
+				control.WidthRequest = 500;
 
 				View = new StackLayout {
 					Orientation = StackOrientation.Horizontal,
