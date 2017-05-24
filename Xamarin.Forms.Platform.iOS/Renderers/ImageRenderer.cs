@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreGraphics;
 using Foundation;
 using UIKit;
 using Xamarin.Forms.Internals;
@@ -126,7 +127,8 @@ namespace Xamarin.Forms.Platform.iOS
 				if (Equals(oldSource, source))
 					return;
 
-				if (oldSource is FileImageSource && source is FileImageSource && ((FileImageSource)oldSource).File == ((FileImageSource)source).File)
+				if (oldSource is FileImageSource && source is FileImageSource &&
+				    ((FileImageSource)oldSource).File == ((FileImageSource)source).File)
 					return;
 
 				Control.Image = null;
@@ -174,6 +176,66 @@ namespace Xamarin.Forms.Platform.iOS
 			}
 
 			Control.Opaque = Element.IsOpaque;
+		}
+
+		public override void LayoutSubviews()
+		{
+			base.LayoutSubviews();
+			ShrinkToAspect();
+		}
+
+		void ShrinkToAspect()
+		{
+			if (Element == null || Control == null || Element.Aspect != Aspect.AspectFit
+			    || Element.HeightRequest > -1 || Element.WidthRequest > -1
+			    || Element.Height < 1 || Element.Width < 1)
+			{
+				return;
+			}
+
+			var size = GetBitmapDisplaySize(Control);
+
+			if (size.Item1 <= 0 || size.Item2 <= 0)
+			{
+				return;
+			}
+
+			//Debug.WriteLine($">>>>> ImageRenderer Shrink 185: Width = {size.Item1}, Height = {size.Item2}");
+
+			//Debug.WriteLine($">>>>> ImageRenderer Shrink 196: _element.Width = {_element.Width}, _element.Height = {_element.Height}");
+			//Debug.WriteLine($">>>>> ImageRenderer Shrink 197: _element.WidthRequest = {_element.WidthRequest}, _element.HeightRequest = {_element.HeightRequest}");
+
+			//	var sizeViaContextFromPixels = new Tuple<double, double>(this.Context.FromPixels(size.Item1), this.Context.FromPixels(size.Item2));
+
+			//	Debug.WriteLine($">>>>> ImageRenderer Shrink 201: (ContextFromPixels version): Width = {sizeViaContextFromPixels.Item1}, Height = {sizeViaContextFromPixels.Item2}");
+
+			const double tolerance = 2;
+
+			var heightDelta = Element.Height - size.Item2;
+
+			if (heightDelta > tolerance)
+			{
+
+				Element.HeightRequest = size.Item2;
+				Element.InvalidateMeasureNonVirtual(InvalidationTrigger.SizeRequestChanged);
+				return;
+			}
+
+			var widthDelta = Element.Width - size.Item1;
+
+			if (widthDelta > tolerance)
+			{
+
+				Element.WidthRequest = size.Item1;
+				Element.InvalidateMeasureNonVirtual(InvalidationTrigger.SizeRequestChanged);
+			}
+
+		}
+
+		public static Tuple<int, int> GetBitmapDisplaySize(UIImageView imageView)
+		{
+			CGSize sizeInView = AVFoundation.AVUtilities.WithAspectRatio(imageView.Bounds, imageView.Image.Size).Size;
+			return new Tuple<int, int>((int)sizeInView.Width, (int)sizeInView.Height);
 		}
 	}
 
