@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Android.Graphics;
 using Android.Graphics.Drawables;
@@ -170,7 +169,7 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 		public override void Layout(int l, int t, int r, int b)
 		{
 			base.Layout(l, t, r, b);
-			ShrinkToAspect();
+			ShrinkIfNecessary();
 		}
 
 		protected virtual async Task TryUpdateBitmap(Image previous = null)
@@ -214,78 +213,79 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 			SetScaleType(type);
 		}
 
-		// TODO hartez 2017/05/16 17:42:14 Clean this up if you can come up with reasonable iOS and Windows implementations	
-		void ShrinkToAspect()
+
+		bool IsElementShrinkable()
 		{
-			if (_element == null || _element.Aspect != Aspect.AspectFit
-				|| _element.HeightRequest > -1 || _element.WidthRequest > -1
-				|| _element.Height < 1 || _element.Width < 1)
+			return _element != null
+				   && _element.Aspect == Aspect.AspectFit
+				   && _element.HeightRequest <= -1
+				   && _element.WidthRequest <= -1
+				   && _element.Height > 1
+				   && _element.Width > 1;
+		}
+
+		void ShrinkIfNecessary()
+		{
+			if (!IsElementShrinkable())
 			{
 				return;
 			}
 
+			// The the size of the image on screen
 			var size = GetBitmapDisplaySize(this);
 
-			if (size.Item1 <= 0 || size.Item2 <= 0)
+			if (size.Width <= 0 || size.Height <= 0)
 			{
 				return;
 			}
 
-			//Debug.WriteLine($">>>>> ImageRenderer Shrink 185: Width = {size.Item1}, Height = {size.Item2}");
-
-			//Debug.WriteLine($">>>>> ImageRenderer Shrink 196: _element.Width = {_element.Width}, _element.Height = {_element.Height}");
-			//Debug.WriteLine($">>>>> ImageRenderer Shrink 197: _element.WidthRequest = {_element.WidthRequest}, _element.HeightRequest = {_element.HeightRequest}");
-
-			var sizeViaContextFromPixels = new Tuple<double, double>(this.Context.FromPixels(size.Item1), this.Context.FromPixels(size.Item2));
-
-			//	Debug.WriteLine($">>>>> ImageRenderer Shrink 201: (ContextFromPixels version): Width = {sizeViaContextFromPixels.Item1}, Height = {sizeViaContextFromPixels.Item2}");
+			// Figure out the device-independent size
+			var independentSize = new Size(Context.FromPixels(size.Width), Context.FromPixels(size.Height));
 
 			const double tolerance = 2;
 
-			var heightDelta = _element.Height - sizeViaContextFromPixels.Item2;
+			var heightDelta = _element.Height - independentSize.Height;
 
 			if (heightDelta > tolerance)
 			{
-				Debug.WriteLine($">>>>> ImageRenderer ShrinkToAspect 211: Resizing because of height delta");
-				_element.HeightRequest = sizeViaContextFromPixels.Item2;
+				_element.HeightRequest = independentSize.Height;
 				_element.InvalidateMeasureNonVirtual(InvalidationTrigger.SizeRequestChanged);
 				return;
 			}
 
-			var widthDelta = _element.Width - sizeViaContextFromPixels.Item1;
+			var widthDelta = _element.Width - independentSize.Width;
 
 			if (widthDelta > tolerance)
 			{
-				Debug.WriteLine($">>>>> ImageRenderer ShrinkToAspect 220: Resizing because of width delta");
-				_element.WidthRequest = sizeViaContextFromPixels.Item1;
+				_element.WidthRequest = independentSize.Width;
 				_element.InvalidateMeasureNonVirtual(InvalidationTrigger.SizeRequestChanged);
 			}
 		}
 
-		public static Tuple<int, int> GetBitmapDisplaySize(AImageView imageView)
+		static Size GetBitmapDisplaySize(AImageView imageView)
 		{
 			if (imageView?.Drawable == null)
-				return new Tuple<int, int>(0, 0);
+			{
+				return Size.Zero;
+			}
 
-			// Get image dimensions
-			// Get image matrix values and place them in an array
-			float[] f = new float[9];
-			imageView.ImageMatrix.GetValues(f);
+			var matrixValues = new float[9];
+			imageView.ImageMatrix.GetValues(matrixValues);
 
 			// Extract the scale values using the constants (if aspect ratio maintained, scaleX == scaleY)
-			float scaleX = f[Matrix.MscaleX];
-			float scaleY = f[Matrix.MscaleY];
+			float scaleX = matrixValues[Matrix.MscaleX];
+			float scaleY = matrixValues[Matrix.MscaleY];
 
-			// Get the drawable (could also get the bitmap behind the drawable and getWidth/getHeight)
-			Drawable d = imageView.Drawable;
-			int origW = d.IntrinsicWidth;
-			int origH = d.IntrinsicHeight;
+			// Get the size of the drawable if it weren't scaled/fit
+			Drawable drawable = imageView.Drawable;
+			int width = drawable.IntrinsicWidth;
+			int height = drawable.IntrinsicHeight;
 
-			// Calculate the actual dimensions
-			int actW = (int)Math.Round(origW * scaleX);
-			int actH = (int)Math.Round(origH * scaleY);
+			// Figure out the current width/height of the drawable
+			double currentWidth = Math.Round(width * scaleX);
+			double currentHeight = Math.Round(height * scaleY);
 
-			return new Tuple<int, int>(actW, actH);
+			return new Size(currentWidth, currentHeight);
 		}
 	}
 }
