@@ -213,14 +213,14 @@ namespace Xamarin.Forms.Platform.WinRT
 			       && Element.Width > 1;
 		}
 
-		bool IsImageShrinkable()
+		bool IsImageLoaded()
 		{
 			return Control != null && Control.ActualHeight > 0 && Control.ActualWidth > 0;
 		}
 
 		void ShrinkIfNecessary()
 		{
-			if (!IsElementShrinkable() || !IsImageShrinkable())
+			if (!IsElementShrinkable() || !IsImageLoaded())
 			{
 				return;
 			}
