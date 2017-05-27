@@ -19,28 +19,6 @@ namespace Xamarin.Forms.Controls.Issues
 		{
 #if APP
 			InitializeComponent ();
-
-			//var s = Device.Info.ScaledScreenSize;
-
-			//var widthPadding = ImageGrid.Padding.Left + ImageGrid.Padding.Right;
-
-			//var cols = ImageGrid.ColumnDefinitions.Count;
-
-			//var totalSpacing = ImageGrid.ColumnSpacing * (cols - 1);
-
-			//var colTotalWidth = s.Width - totalSpacing - widthPadding;
-
-			//var colSize = colTotalWidth / cols;
-
-			//foreach (var coldef in ImageGrid.ColumnDefinitions)
-			//{
-			//	coldef.Width = new GridLength(colSize, GridUnitType.Absolute);
-			//}
-
-			//foreach (var rowdef in ImageGrid.RowDefinitions)
-			//{
-			//	rowdef.Height = new GridLength(colSize / 0.72, GridUnitType.Absolute);
-			//}
 #endif
 		}
 

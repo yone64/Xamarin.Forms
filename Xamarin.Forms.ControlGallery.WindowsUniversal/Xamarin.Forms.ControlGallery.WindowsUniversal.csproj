@@ -120,12 +120,18 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="blue.jpg" />
+    <Content Include="brown.jpg" />
     <Content Include="coffee.png" />
     <Content Include="default.css" />
+    <Content Include="green.jpg" />
     <Content Include="invalidimage.jpg" />
     <Content Include="local.html" />
+    <Content Include="purple.jpg" />
+    <Content Include="red.jpg" />
     <Content Include="toolbar_close.png" />
     <Content Include="WebImages\XamarinLogo.png" />
+    <Content Include="yellow.jpg" />
     <None Include="project.json" />
     <Content Include="..\Xamarin.Forms.ControlGallery.WP8\bank.png">
       <Link>bank.png</Link>

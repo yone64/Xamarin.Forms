@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Media;
@@ -46,6 +47,7 @@ namespace Xamarin.Forms.Platform.WinRT
 				{
 					Control.ImageOpened -= OnImageOpened;
 					Control.ImageFailed -= OnImageFailed;
+					Control.SizeChanged -= ImageOnSizeChanged;
 				}
 			}
 
@@ -63,12 +65,20 @@ namespace Xamarin.Forms.Platform.WinRT
 					var image = new Windows.UI.Xaml.Controls.Image();
 					image.ImageOpened += OnImageOpened;
 					image.ImageFailed += OnImageFailed;
+					image.SizeChanged += ImageOnSizeChanged;
 					SetNativeControl(image);
 				}
 
 				await TryUpdateSource();
 				UpdateAspect();
 			}
+		}
+
+		void ImageOnSizeChanged(object sender, SizeChangedEventArgs sizeChangedEventArgs)
+		{
+			Debug.WriteLine($">>>>> ImageRenderer ImageOnSizeChanged 79: Control.ActualHeight = {Control.ActualHeight}, Control.ActualWidth = {Control.ActualWidth}");
+
+			ShrinkToAspect();
 		}
 
 		protected override async void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
@@ -101,6 +111,8 @@ namespace Xamarin.Forms.Platform.WinRT
 			{
 				RefreshImage();
 			}
+
+			Debug.WriteLine($">>>>> ImageRenderer OnImageOpened 106: Control.ActualHeight = {Control.ActualHeight}, Control.ActualWidth = {Control.ActualWidth}");
 
 			Element?.SetIsLoading(false);
 		}
@@ -193,6 +205,58 @@ namespace Xamarin.Forms.Platform.WinRT
 			{
 				Control.Source = null;
 				Element.SetIsLoading(false);
+			}
+		}
+
+		// TODO hartez 2017/05/26 12:57:36 Fix the int casts	
+		// TODO hartez 2017/05/26 12:57:45 This should return a DidINvalidate bool so we know not to bother with Refresh	
+		void ShrinkToAspect()
+		{
+			if (Element == null || Element.Aspect != Aspect.AspectFit
+				|| Element.HeightRequest > -1 || Element.WidthRequest > -1
+				|| Element.Height < 1 || Element.Width < 1)
+			{
+				return;
+			}
+
+			if (Control == null || Control.ActualHeight == 0 || Control.ActualWidth == 0)
+			{
+				return;
+			}
+
+			var size = new Tuple<int, int>((int)Control.ActualWidth, (int)Control.ActualHeight);
+
+			if (size.Item1 <= 0 || size.Item2 <= 0)
+			{
+				return;
+			}
+
+			//Debug.WriteLine($">>>>> ImageRenderer Shrink 185: Width = {size.Item1}, Height = {size.Item2}");
+
+			//Debug.WriteLine($">>>>> ImageRenderer Shrink 196: _element.Width = {_element.Width}, _element.Height = {_element.Height}");
+			//Debug.WriteLine($">>>>> ImageRenderer Shrink 197: _element.WidthRequest = {_element.WidthRequest}, _element.HeightRequest = {_element.HeightRequest}");
+
+			//	Debug.WriteLine($">>>>> ImageRenderer Shrink 201: (ContextFromPixels version): Width = {sizeViaContextFromPixels.Item1}, Height = {sizeViaContextFromPixels.Item2}");
+
+			const double tolerance = 2;
+
+			var heightDelta = Element.Height - size.Item2;
+
+			if (heightDelta > tolerance)
+			{
+				Debug.WriteLine($">>>>> ImageRenderer ShrinkToAspect 211: Resizing because of height delta");
+				Element.HeightRequest = size.Item2;
+				Element.InvalidateMeasureNonVirtual(InvalidationTrigger.SizeRequestChanged);
+				return;
+			}
+
+			var widthDelta = Element.Width - size.Item1;
+
+			if (widthDelta > tolerance)
+			{
+				Debug.WriteLine($">>>>> ImageRenderer ShrinkToAspect 220: Resizing because of width delta");
+				Element.WidthRequest = size.Item1;
+				Element.InvalidateMeasureNonVirtual(InvalidationTrigger.SizeRequestChanged);
 			}
 		}
 	}
