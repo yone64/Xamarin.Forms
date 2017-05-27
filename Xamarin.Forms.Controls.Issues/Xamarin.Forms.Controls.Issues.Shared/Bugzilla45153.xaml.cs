@@ -12,7 +12,7 @@ using Xamarin.Forms.Xaml;
 namespace Xamarin.Forms.Controls.Issues
 {
 	[Preserve(AllMembers = true)]
-	[Issue(IssueTracker.Bugzilla, 945153, "ScrollView with 2x3 Grid of images doesn't fit screen well", PlatformAffected.All)]
+	[Issue(IssueTracker.Bugzilla, 45153, "ScrollView with 2x3 Grid of images doesn't fit screen well", PlatformAffected.All)]
 	public partial class Bugzilla45153 :  TestContentPage
 	{
 		public Bugzilla45153 ()
