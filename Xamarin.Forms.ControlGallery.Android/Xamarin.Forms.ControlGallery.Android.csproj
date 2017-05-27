@@ -292,22 +292,22 @@
     <AndroidResource Include="Resources\drawable\synchronize_enabled.png" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\drawable\blue.jpg" />
+    <AndroidResource Include="Resources\drawable\solid_blue.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\drawable\brown.jpg" />
+    <AndroidResource Include="Resources\drawable\solid_brown.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\drawable\green.jpg" />
+    <AndroidResource Include="Resources\drawable\solid_green.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\drawable\purple.jpg" />
+    <AndroidResource Include="Resources\drawable\solid_purple.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\drawable\red.jpg" />
+    <AndroidResource Include="Resources\drawable\solid_red.jpg" />
   </ItemGroup>
   <ItemGroup>
-    <AndroidResource Include="Resources\drawable\yellow.jpg" />
+    <AndroidResource Include="Resources\drawable\solid_yellow.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Xamarin\Android\Xamarin.Android.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

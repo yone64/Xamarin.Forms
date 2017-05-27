@@ -2,6 +2,7 @@
 <controls:TestContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:Xamarin.Forms.Controls;assembly=Xamarin.Forms.Core.Android.UITests"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
              x:Class="Xamarin.Forms.Controls.Issues.Bugzilla45153">
     <ContentPage.Padding>
         <OnPlatform x:TypeArguments="Thickness" iOS="0, 20, 0, 0" />
@@ -18,18 +19,18 @@
                 </Grid.ColumnDefinitions>
 
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="100" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="150" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
 
                 </Grid.RowDefinitions>
 
-                <Image Source="red.jpg"  Aspect="AspectFit" Grid.Column="0" Grid.Row="0" HorizontalOptions="Center"  BackgroundColor="Aqua"/>
-                <Image Source="oasis.jpg" Aspect="AspectFit" Grid.Column="1" Grid.Row="0"  BackgroundColor="Aqua"/>
-                <Image Source="oasis.jpg" Aspect="AspectFit" Grid.Column="0" Grid.Row="1" BackgroundColor="Aqua" />
-                <Image Source="oasis.jpg" Aspect="AspectFit" Grid.Column="1" Grid.Row="1" BackgroundColor="Aqua" />
-                <Image Source="purple.jpg" Aspect="AspectFit" Grid.Column="0" Grid.Row="2" BackgroundColor="Aqua" />
-                <Image Source="yellow.jpg" Aspect="AspectFit" Grid.Column="1" Grid.Row="2" BackgroundColor="Aqua" />
+                <Image Source="solid_red.jpg" Aspect="AspectFit" Grid.Column="0" Grid.Row="0" BackgroundColor="Aqua" />
+                <Image Source="solid_blue.jpg" Aspect="AspectFit" Grid.Column="1" Grid.Row="0"  BackgroundColor="Aqua" />
+                <Image Source="solid_green.jpg" Aspect="AspectFit" Grid.Column="0" Grid.Row="1" BackgroundColor="Aqua" />
+                <Image Source="solid_brown.jpg" Aspect="AspectFit" Grid.Column="1" Grid.Row="1" BackgroundColor="Aqua" />
+                <Image Source="solid_purple.jpg" Aspect="AspectFit" Grid.Column="0" Grid.Row="2" BackgroundColor="Aqua" />
+                <Image Source="solid_yellow.jpg" Aspect="AspectFit" Grid.Column="1" Grid.Row="2" BackgroundColor="Aqua" />
 
             </Grid>
         </ScrollView>
