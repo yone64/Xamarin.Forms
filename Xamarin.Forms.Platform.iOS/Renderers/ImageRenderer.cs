@@ -196,6 +196,11 @@ namespace Xamarin.Forms.Platform.iOS
 
 		static CGSize GetBitmapDisplaySize(UIImageView imageView)
 		{
+			if (imageView?.Image == null)
+			{
+				return CGSize.Empty;
+			}
+
 			return AVFoundation.AVUtilities.WithAspectRatio(imageView.Bounds, imageView.Image.Size).Size;
 		}
 
