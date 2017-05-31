@@ -4,14 +4,11 @@ using Xamarin.UITest.iOS;
 
 namespace Xamarin.Forms.Core.UITests
 {
+	#if __IOS__ // No point in running this on other platforms, it'll always pass
 	[TestFixture]
 	[Category("Cells")]
 	internal class UnevenListTests : BaseTestFixture
 	{
-		public UnevenListTests()
-		{
-		}
-
 		protected override void NavigateToGallery()
 		{
 			App.NavigateToGallery(GalleryQueries.UnevenListGalleryLegacy);
@@ -20,7 +17,7 @@ namespace Xamarin.Forms.Core.UITests
 		[Test]
 		public void UnevenListCellTest()
 		{
-			if (UnevenListTests.ShouldRunTest(App))
+			if (ShouldRunTest(App))
 			{
 				var element = App.Query(q => q.Marked("unevenCellListGalleryDynamic").Descendant(("UITableViewCellContentView")))[0];
 
@@ -34,4 +31,5 @@ namespace Xamarin.Forms.Core.UITests
 			return (appAs != null && appAs.Device.IsPhone);
 		}
 	}
+	#endif
 }
