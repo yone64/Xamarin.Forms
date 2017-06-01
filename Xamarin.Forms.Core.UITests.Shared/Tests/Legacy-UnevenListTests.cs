@@ -7,7 +7,7 @@ namespace Xamarin.Forms.Core.UITests
 	#if __IOS__ // No point in running this on other platforms, it'll always pass
 	[TestFixture]
 	[Category(UITestCategories.Cells)]
-	internal class UnevenListTests : BaseTestFixture
+	internal class AUnevenListTests : BaseTestFixture
 	{
 		protected override void NavigateToGallery()
 		{
