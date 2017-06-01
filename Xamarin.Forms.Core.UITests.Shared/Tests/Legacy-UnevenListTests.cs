@@ -15,7 +15,7 @@ namespace Xamarin.Forms.Core.UITests
 		}
 
 		[Test]
-		public void UnevenListCellTest()
+		public void A_UnevenListCellTest()
 		{
 			if (ShouldRunTest(App))
 			{
