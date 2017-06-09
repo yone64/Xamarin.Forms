@@ -20,6 +20,7 @@ namespace Xamarin.Forms
 		string _path;
 		object _source;
 		string _updateSourceEventName;
+		bool _hasSourceApplied;
 
 		public Binding()
 		{
@@ -81,6 +82,7 @@ namespace Xamarin.Forms
 			{
 				ThrowIfApplied();
 				_source = value;
+				_hasSourceApplied = false;
 			}
 		}
 
@@ -119,11 +121,17 @@ namespace Xamarin.Forms
 			object src = _source;
 			base.Apply(src ?? newContext, bindObj, targetProperty);
 
+			if (src != null && _hasSourceApplied)
+				return;
+			
 			object bindingContext = src ?? Context ?? newContext;
 			if (_expression == null && bindingContext != null)
 				_expression = new BindingExpression(this, SelfPath);
 
 			_expression.Apply(bindingContext, bindObj, targetProperty);
+
+			if (src != null)
+				_hasSourceApplied = true;
 		}
 
 		internal override BindingBase Clone()
