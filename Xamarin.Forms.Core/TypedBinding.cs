@@ -16,6 +16,7 @@ namespace Xamarin.Forms.Internals
 		object _converterParameter;
 		object _source;
 		string _updateSourceEventName;
+		internal bool _hasSourceApplied;
 
 		public IValueConverter Converter {
 			get { return _converter; }
@@ -38,6 +39,7 @@ namespace Xamarin.Forms.Internals
 			set {
 				ThrowIfApplied();
 				_source = value;
+				_hasSourceApplied = false;
 			}
 		}
 
@@ -107,6 +109,9 @@ namespace Xamarin.Forms.Internals
 			_targetProperty = targetProperty;
 			var source = Source ?? Context ?? context;
 
+			if (Source != null && _hasSourceApplied)
+				return;
+			
 #if (!DO_NOT_CHECK_FOR_BINDING_REUSE)
 			base.Apply(source, bindObj, targetProperty);
 
@@ -122,6 +127,9 @@ namespace Xamarin.Forms.Internals
 			_weakTarget.SetTarget(bindObj);
 
 			ApplyCore(source, bindObj, targetProperty);
+
+			if (Source != null)
+				_hasSourceApplied = true;
 		}
 
 		internal override BindingBase Clone()
