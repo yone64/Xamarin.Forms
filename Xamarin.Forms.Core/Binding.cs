@@ -20,7 +20,6 @@ namespace Xamarin.Forms
 		string _path;
 		object _source;
 		string _updateSourceEventName;
-		bool _hasSourceApplied;
 
 		public Binding()
 		{
@@ -82,7 +81,6 @@ namespace Xamarin.Forms
 			{
 				ThrowIfApplied();
 				_source = value;
-				_hasSourceApplied = false;
 			}
 		}
 
@@ -116,22 +114,21 @@ namespace Xamarin.Forms
 			_expression.Apply(fromTarget);
 		}
 
-		internal override void Apply(object newContext, BindableObject bindObj, BindableProperty targetProperty)
+		internal override void Apply(object newContext, BindableObject bindObj, BindableProperty targetProperty, bool fromBindingContextChanged = false)
 		{
 			object src = _source;
-			base.Apply(src ?? newContext, bindObj, targetProperty);
+			var isApplied = IsApplied;
 
-			if (src != null && _hasSourceApplied)
+			base.Apply(src ?? newContext, bindObj, targetProperty, fromBindingContextChanged: fromBindingContextChanged);
+
+			if (src != null && isApplied && fromBindingContextChanged)
 				return;
-			
+
 			object bindingContext = src ?? Context ?? newContext;
 			if (_expression == null && bindingContext != null)
 				_expression = new BindingExpression(this, SelfPath);
 
 			_expression.Apply(bindingContext, bindObj, targetProperty);
-
-			if (src != null)
-				_hasSourceApplied = true;
 		}
 
 		internal override BindingBase Clone()
@@ -155,9 +152,12 @@ namespace Xamarin.Forms
 			return base.GetTargetValue(value, sourcePropertyType);
 		}
 
-		internal override void Unapply()
+		internal override void Unapply(bool fromBindingContextChanged = false)
 		{
-			base.Unapply();
+			if (Source != null && fromBindingContextChanged && IsApplied)
+				return;
+			
+			base.Unapply(fromBindingContextChanged: fromBindingContextChanged);
 
 			if (_expression != null)
 				_expression.Unapply();
