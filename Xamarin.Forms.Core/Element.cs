@@ -356,7 +356,7 @@ namespace Xamarin.Forms
 			if (Platform != null)
 				child.Platform = Platform;
 
-			child.ApplyBindings();
+			child.ApplyBindings(skipBindingContext: false, fromBindingContextChanged:true);
 
 			if (ChildAdded != null)
 				ChildAdded(this, new ElementEventArgs(child));

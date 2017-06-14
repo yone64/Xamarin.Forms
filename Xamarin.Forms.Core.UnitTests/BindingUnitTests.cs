@@ -2143,5 +2143,19 @@ namespace Xamarin.Forms.Core.UnitTests
 			bindable.BindingContext = new object();
 			Assert.That(model.Count, Is.EqualTo(1));
 		}
+
+		[Test]
+		// https://bugzilla.xamarin.com/show_bug.cgi?id=57081
+		public void BindingWithSourceNotReappliedWhenParented()
+		{
+			var view = new ContentView();
+			var model = new VM57081();
+			Assume.That(model.Count, Is.EqualTo(0));
+			view.SetBinding(BindableObject.BindingContextProperty, new Binding { Path = "Foo", Source = model });
+			Assume.That(model.Count, Is.EqualTo(1));
+			var parent = new ContentView { BindingContext = new object() };
+			parent.Content = view;
+			Assert.That(model.Count, Is.EqualTo(1));
+		}
 	}
 }
