@@ -91,6 +91,6 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <None Include="Properties\Xamarin.Forms.Xaml.rd.xml" />
+    <EmbeddedResource Include="Properties\Xamarin.Forms.Xaml.rd.xml" />
   </ItemGroup>
 </Project>
