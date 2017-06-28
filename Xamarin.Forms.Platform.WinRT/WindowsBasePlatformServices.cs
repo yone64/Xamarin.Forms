@@ -74,11 +74,11 @@ namespace Xamarin.Forms.Platform.WinRT
 			}
 
 			Assembly thisAssembly = GetType().GetTypeInfo().Assembly;
-			Assembly xamlAssembly = typeof(Xamarin.Forms.Xaml.IMarkupExtension).GetTypeInfo().Assembly;
 			// this happens with .NET Native
 			if (!assemblies.Contains(thisAssembly))
 				assemblies.Add(thisAssembly);
 
+			Assembly xamlAssembly = typeof(Xamarin.Forms.Xaml.IMarkupExtension).GetTypeInfo().Assembly;
 			if (!assemblies.Contains(xamlAssembly))
 				assemblies.Add(xamlAssembly);
 
