@@ -26,7 +26,7 @@ namespace Xamarin.Forms.Controls.Issues
 		{
 			s_dataCollection = new ObservableCollection<_44998Data>();
 
-			for (int i = 0; i < 10; i++)
+			for (int i = 0; i < 1; i++)
 			{
 				_44998Data d = new _44998Data
 				{

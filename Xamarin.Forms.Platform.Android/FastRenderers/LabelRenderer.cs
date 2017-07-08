@@ -5,6 +5,7 @@ using Android.Graphics;
 using Android.Text;
 using Android.Util;
 using Android.Views;
+using Android.Widget;
 using AView = Android.Views.View;
 
 namespace Xamarin.Forms.Platform.Android.FastRenderers
@@ -26,10 +27,20 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 		
 		bool _wasFormatted;
 
+		string _handle;
+
 		public LabelRenderer() : base(Forms.Context)
 		{
 			_labelTextColorDefault = TextColors;
 			_visualElementRenderer = new VisualElementRenderer(this);
+
+			_handle = Handle.ToString("x");
+			System.Diagnostics.Debug.WriteLine($">>>>> LabelRenderer constructed with handle: {_handle}");
+		}
+
+		~LabelRenderer()
+		{
+			System.Diagnostics.Debug.WriteLine($">>>>> LabelRenderer ~LabelRenderer finalizer");
 		}
 
 		public event EventHandler<VisualElementChangedEventArgs> ElementChanged;
@@ -130,6 +141,9 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 
 		protected override void Dispose(bool disposing)
 		{
+			var handle = Handle.ToString("x");
+			System.Diagnostics.Debug.WriteLine($">>>>> LabelRenderer Dispose called with disposing = {disposing}, handle was {_handle}, handle is {handle}");
+
 			if (_disposed)
 				return;
 
@@ -263,6 +277,9 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 
 		void UpdateText()
 		{
+			var handle = Handle.ToString("x");
+			System.Diagnostics.Debug.WriteLine($">>>>> LabelRenderer UpdateText handle = {handle}, was {_handle}");
+
 			if (Element.FormattedText != null)
 			{
 				FormattedString formattedText = Element.FormattedText ?? Element.Text;

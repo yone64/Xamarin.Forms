@@ -24,6 +24,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected FormsTextView(IntPtr javaReference, JniHandleOwnership transfer) : base(javaReference, transfer)
 		{
+			System.Diagnostics.Debug.WriteLine($">>>>> FormsTextView FormsTextView 27: MESSAGE");
 		}
 
 		public override void Invalidate()
