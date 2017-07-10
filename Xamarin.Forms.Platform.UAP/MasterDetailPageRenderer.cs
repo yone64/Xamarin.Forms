@@ -15,7 +15,6 @@ namespace Xamarin.Forms.Platform.UWP
 	{
 		Page _master;
 		Page _detail;
-		bool _showTitle;
 
 		VisualElementTracker<Page, FrameworkElement> _tracker;
 
@@ -60,15 +59,11 @@ namespace Xamarin.Forms.Platform.UWP
 
 		bool ITitleProvider.ShowTitle
 		{
-			get { return _showTitle; }
+			get { return Control.DetailTitleVisibility == Visibility.Visible; }
 
 			set
 			{
-				if (_showTitle == value)
-					return;
-
-				_showTitle = value;
-				Control.DetailTitleVisibility = _showTitle ? Visibility.Visible : Visibility.Collapsed;
+				Control.DetailTitleVisibility = value ? Visibility.Visible : Visibility.Collapsed;
 			}
 		}
 
