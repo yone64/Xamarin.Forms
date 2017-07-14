@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Appium.Windows;
 using OpenQA.Selenium.Remote;
 using Xamarin.UITest;
@@ -31,11 +32,16 @@ namespace Xamarin.Forms.Core.UITests
 				Session.Manage().Timeouts().ImplicitlyWait(TimeSpan.FromSeconds(4));
 			}
 
-            // TODO hartez This needs to reset the app to the main page
+			// Make sure we're at the start screen
+			Session?.Keyboard.PressKey(Keys.Escape);
 
 			return new WinDriverApp(Session);
 		}
 
+		public static void TearDown()
+		{
+			Session?.Keyboard.PressKey(Keys.Escape);
+		}
 	}
 
 	public class WinDriverApp : IApp
@@ -304,11 +310,10 @@ namespace Xamarin.Forms.Core.UITests
 			throw new NotImplementedException();
 		}
 
-		public AppResult[] WaitForElement(Func<AppQuery, AppQuery> query, string timeoutMessage = "Timed out waiting for element...",
-			TimeSpan? timeout = null, TimeSpan? retryFrequency = null, TimeSpan? postTimeout = null)
+		AppResult[] Wait(Func<ReadOnlyCollection<WindowsElement>> query,
+			string timeoutMessage = "Timed out waiting for element...",
+			TimeSpan? timeout = null, TimeSpan? retryFrequency = null)
 		{
-			var start = DateTime.Now;
-
 			if (timeout == null)
 			{
 				timeout = TimeSpan.FromSeconds(5);
@@ -319,14 +324,15 @@ namespace Xamarin.Forms.Core.UITests
 				retryFrequency = TimeSpan.FromMilliseconds(500);
 			}
 
-			var rawQuery = GetRawQuery(query);
-			var result = QueryWindows(rawQuery);
+			var start = DateTime.Now;
+
+			var result = query();
 
 			while (result.Count == 0)
 			{
 				if (DateTime.Now.Subtract(start).Ticks >= timeout.Value.Ticks)
 				{
-					throw new TimeoutException(timeoutMessage + " " + rawQuery);
+					throw new TimeoutException(timeoutMessage);
 				}
 
 				Task.Delay(retryFrequency.Value.Milliseconds).Wait();
@@ -335,10 +341,19 @@ namespace Xamarin.Forms.Core.UITests
 			return result.Select(Convert).ToArray();
 		}
 
+		public AppResult[] WaitForElement(Func<AppQuery, AppQuery> query, string timeoutMessage = "Timed out waiting for element...",
+			TimeSpan? timeout = null, TimeSpan? retryFrequency = null, TimeSpan? postTimeout = null)
+		{
+			var rawQuery = GetRawQuery(query);
+			Func<ReadOnlyCollection<WindowsElement>> result = () => QueryWindows(rawQuery);
+			return Wait(result, $"{timeoutMessage} {rawQuery}", timeout, retryFrequency);
+		}
+
 		public AppResult[] WaitForElement(string marked, string timeoutMessage = "Timed out waiting for element...",
 			TimeSpan? timeout = null, TimeSpan? retryFrequency = null, TimeSpan? postTimeout = null)
 		{
-			throw new NotImplementedException();
+			Func<ReadOnlyCollection<WindowsElement>> result = () => _session.FindElementsByName(marked);
+			return Wait(result, $"{timeoutMessage} {marked}", timeout, retryFrequency);
 		}
 
 		public AppWebResult[] WaitForElement(Func<AppQuery, AppWebQuery> query, string timeoutMessage = "Timed out waiting for element...",
