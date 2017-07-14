@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Reflection;
-using Xamarin.Forms.Core.UITests;
 using Xamarin.Forms.CustomAttributes;
 
 #if UITEST
+using Xamarin.Forms.Core.UITests;
 using NUnit.Framework;
 using Xamarin.UITest;
 

@@ -31,6 +31,8 @@ namespace Xamarin.Forms.Core.UITests
 				Session.Manage().Timeouts().ImplicitlyWait(TimeSpan.FromSeconds(4));
 			}
 
+            // TODO hartez This needs to reset the app to the main page
+
 			return new WinDriverApp(Session);
 		}
 
@@ -38,7 +40,7 @@ namespace Xamarin.Forms.Core.UITests
 
 	public class WinDriverApp : IApp
 	{
-		WindowsDriver<WindowsElement> _session;
+	    readonly WindowsDriver<WindowsElement> _session;
 
 		public WinDriverApp(WindowsDriver<WindowsElement> session)
 		{
@@ -55,32 +57,61 @@ namespace Xamarin.Forms.Core.UITests
 			return query(new AppQuery(QueryPlatform.iOS)).ToString();
 		}
 
-		ReadOnlyCollection<WindowsElement> WinQuery(string rawQuery)
+		readonly Dictionary<string, string> _controlNameToTag = new Dictionary<string, string>
+		{
+            {"button", "ControlType.Button"} 
+        };
+
+		ReadOnlyCollection<WindowsElement> FilterControlType(IEnumerable<WindowsElement> elements, string controlType)
+		{
+			var tag = controlType;
+
+			if (tag == "*")
+			{
+				return new ReadOnlyCollection<WindowsElement>(elements.ToList());
+			}
+
+			if (_controlNameToTag.ContainsKey(controlType))
+			{
+				tag = _controlNameToTag[controlType];
+			}
+
+			return new ReadOnlyCollection<WindowsElement>(elements.Where(element => element.TagName == tag).ToList()); 
+		}
+
+		class WinQuery
+		{
+			public WinQuery(string rawQuery)
+			{
+				var spaceIndex = rawQuery.IndexOf(" ", StringComparison.Ordinal);
+				ControlType = rawQuery.Substring(0, spaceIndex);
+				Marked = rawQuery.Substring(spaceIndex).Replace("marked:'", "").Replace("'", "").Trim(); // TODO hartez that's just ... awful
+			}
+
+			public string ControlType { get; }
+
+			public string Marked { get; }
+
+			public override string ToString()
+			{
+				return $"{nameof(ControlType)}: {ControlType}, {nameof(Marked)}: {Marked}";
+			}
+		}
+
+		ReadOnlyCollection<WindowsElement> QueryWindows(string rawQuery)
 		{
 			Debug.WriteLine($">>>>> WinDriverApp WinQuery 60: Raw query is '{rawQuery}'");
 
-			// barely functional example 
-			if (rawQuery.StartsWith("button"))
-			{
-				// ^^^^ grab that first part and build up a dictionary of filters for it
+			var winQuery = new WinQuery(rawQuery);
 
-				// Looking for a button
-				var marked = rawQuery.Substring(rawQuery.IndexOf("'", StringComparison.InvariantCulture));
+			Debug.WriteLine($">>>>> Windows query is {winQuery}");
+		
+			var resultByName = _session.FindElementsByName(winQuery.Marked);
+			var resultByAutomationId = _session.FindElementsByAccessibilityId(winQuery.Marked);
 
-				marked = marked.Replace("'", "");
+			var result = resultByName.Concat(resultByAutomationId);
 
-				Debug.WriteLine($">>>>> WinDriverApp WinQuery marked: {marked}");
-
-				var result = _session.FindElementsByName(marked);
-
-				// TODO hartez 2017/07/13 18:29:56 Filter this result by TagName (ControlType.Button)	
-				// or, if it's *, return everything
-
-				return result;
-			}
-
-			// TODO hartez 2017/07/13 18:15:09 Make this actually work	
-			return _session.FindElementsByWindowsUIAutomation(rawQuery);
+			return FilterControlType(result, winQuery.ControlType);
 		}
 
 		// TODO hartez 2017/07/13 18:16:20 Make this actually work	
@@ -93,7 +124,7 @@ namespace Xamarin.Forms.Core.UITests
 		{
 			var raw = GetRawQuery(query);
 
-			var elements = WinQuery(raw);
+			var elements = QueryWindows(raw);
 
 			return elements.Select(Convert).ToArray();
 		}
@@ -135,7 +166,7 @@ namespace Xamarin.Forms.Core.UITests
 
 		public void EnterText(Func<AppQuery, AppQuery> query, string text)
 		{
-			throw new NotImplementedException();
+			QueryWindows(GetRawQuery(query)).First().SendKeys(text);
 		}
 
 		public void EnterText(string marked, string text)
@@ -180,7 +211,7 @@ namespace Xamarin.Forms.Core.UITests
 
 		public void Tap(Func<AppQuery, AppQuery> query)
 		{
-			var results = WinQuery(GetRawQuery(query));
+			var results = QueryWindows(GetRawQuery(query));
 
 			if (results.Any())
 			{
@@ -276,7 +307,32 @@ namespace Xamarin.Forms.Core.UITests
 		public AppResult[] WaitForElement(Func<AppQuery, AppQuery> query, string timeoutMessage = "Timed out waiting for element...",
 			TimeSpan? timeout = null, TimeSpan? retryFrequency = null, TimeSpan? postTimeout = null)
 		{
-			throw new NotImplementedException();
+			var start = DateTime.Now;
+
+			if (timeout == null)
+			{
+				timeout = TimeSpan.FromSeconds(5);
+			}
+
+			if (retryFrequency == null)
+			{
+				retryFrequency = TimeSpan.FromMilliseconds(500);
+			}
+
+			var rawQuery = GetRawQuery(query);
+			var result = QueryWindows(rawQuery);
+
+			while (result.Count == 0)
+			{
+				if (DateTime.Now.Subtract(start).Ticks >= timeout.Value.Ticks)
+				{
+					throw new TimeoutException(timeoutMessage + " " + rawQuery);
+				}
+
+				Task.Delay(retryFrequency.Value.Milliseconds).Wait();
+			}
+
+			return result.Select(Convert).ToArray();
 		}
 
 		public AppResult[] WaitForElement(string marked, string timeoutMessage = "Timed out waiting for element...",
@@ -294,8 +350,7 @@ namespace Xamarin.Forms.Core.UITests
 		public void WaitForNoElement(Func<AppQuery, AppQuery> query, string timeoutMessage = "Timed out waiting for no element...",
 			TimeSpan? timeout = null, TimeSpan? retryFrequency = null, TimeSpan? postTimeout = null)
 		{
-			// TODO hartez 2017/07/13 18:31:16 This is next - we get this and tap, we've got like half the damn tests covered	
-			throw new NotImplementedException();
+				throw new NotImplementedException();
 		}
 
 		public void WaitForNoElement(string marked, string timeoutMessage = "Timed out waiting for no element...",
