@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using Xamarin.Forms.Core.UITests;
 using Xamarin.Forms.CustomAttributes;
 
 #if UITEST
@@ -45,6 +46,9 @@ namespace Xamarin.Forms.Controls
 #elif __MACOS__
 			Xamarin.UITest.Desktop.TestAgent.Start();
 			app = InitializeMacOSApp();
+
+#elif __WINDOWS__
+			app = InitializeUWPApp();
 #endif
 			if (app == null)
 				throw new NullReferenceException("App was not initialized.");
@@ -90,6 +94,13 @@ namespace Xamarin.Forms.Controls
 							.BundleId(AppPaths.MacOSBundleId)
 							.StartApp();
 			return new Xamarin.Forms.Core.macOS.UITests.MacOSApp(app);
+		}
+#endif
+
+#if __WINDOWS__
+		static IApp InitializeUWPApp()
+		{
+			return WindowsTestBase.ConfigureApp();
 		}
 #endif
 
