@@ -310,7 +310,23 @@ namespace Xamarin.Forms.Core.UITests
 			throw new NotImplementedException();
 		}
 
+		AppResult[] WaitForAtLeastOne(Func<ReadOnlyCollection<WindowsElement>> query,
+			string timeoutMessage = "Timed out waiting for element...",
+			TimeSpan? timeout = null, TimeSpan? retryFrequency = null)
+		{
+			return Wait(query, i => i > 0, timeoutMessage, timeout, retryFrequency);
+		}
+
+		void WaitForNone(Func<ReadOnlyCollection<WindowsElement>> query,
+			string timeoutMessage = "Timed out waiting for element...",
+			TimeSpan? timeout = null, TimeSpan? retryFrequency = null)
+		{
+			Wait(query, i => i == 0, timeoutMessage, timeout, retryFrequency);
+		}
+
+
 		AppResult[] Wait(Func<ReadOnlyCollection<WindowsElement>> query,
+			Func<int, bool> satisfactory,
 			string timeoutMessage = "Timed out waiting for element...",
 			TimeSpan? timeout = null, TimeSpan? retryFrequency = null)
 		{
@@ -328,7 +344,7 @@ namespace Xamarin.Forms.Core.UITests
 
 			var result = query();
 
-			while (result.Count == 0)
+			while (!satisfactory(result.Count))
 			{
 				if (DateTime.Now.Subtract(start).Ticks >= timeout.Value.Ticks)
 				{
@@ -346,14 +362,14 @@ namespace Xamarin.Forms.Core.UITests
 		{
 			var rawQuery = GetRawQuery(query);
 			Func<ReadOnlyCollection<WindowsElement>> result = () => QueryWindows(rawQuery);
-			return Wait(result, $"{timeoutMessage} {rawQuery}", timeout, retryFrequency);
+			return WaitForAtLeastOne(result, $"{timeoutMessage} {rawQuery}", timeout, retryFrequency);
 		}
 
 		public AppResult[] WaitForElement(string marked, string timeoutMessage = "Timed out waiting for element...",
 			TimeSpan? timeout = null, TimeSpan? retryFrequency = null, TimeSpan? postTimeout = null)
 		{
 			Func<ReadOnlyCollection<WindowsElement>> result = () => _session.FindElementsByName(marked);
-			return Wait(result, $"{timeoutMessage} {marked}", timeout, retryFrequency);
+			return WaitForAtLeastOne(result, $"{timeoutMessage} {marked}", timeout, retryFrequency);
 		}
 
 		public AppWebResult[] WaitForElement(Func<AppQuery, AppWebQuery> query, string timeoutMessage = "Timed out waiting for element...",
@@ -365,13 +381,16 @@ namespace Xamarin.Forms.Core.UITests
 		public void WaitForNoElement(Func<AppQuery, AppQuery> query, string timeoutMessage = "Timed out waiting for no element...",
 			TimeSpan? timeout = null, TimeSpan? retryFrequency = null, TimeSpan? postTimeout = null)
 		{
-				throw new NotImplementedException();
+			var rawQuery = GetRawQuery(query);
+			Func<ReadOnlyCollection<WindowsElement>> result = () => QueryWindows(rawQuery);
+			WaitForNone(result, $"{timeoutMessage} {rawQuery}", timeout, retryFrequency);
 		}
 
 		public void WaitForNoElement(string marked, string timeoutMessage = "Timed out waiting for no element...",
 			TimeSpan? timeout = null, TimeSpan? retryFrequency = null, TimeSpan? postTimeout = null)
 		{
-			throw new NotImplementedException();
+			Func<ReadOnlyCollection<WindowsElement>> result = () => _session.FindElementsByName(marked);
+			WaitForNone(result, $"{timeoutMessage} {marked}", timeout, retryFrequency);
 		}
 
 		public void WaitForNoElement(Func<AppQuery, AppWebQuery> query, string timeoutMessage = "Timed out waiting for no element...",
