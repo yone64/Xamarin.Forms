@@ -121,6 +121,7 @@ namespace Xamarin.Forms.Platform.Android
 				RegisterHandlerForDefaultRenderer(typeof(Picker), typeof(AppCompat.PickerRenderer), typeof(PickerRenderer));
 				RegisterHandlerForDefaultRenderer(typeof(Frame), typeof(AppCompat.FrameRenderer), typeof(FrameRenderer));
 				RegisterHandlerForDefaultRenderer(typeof(CarouselPage), typeof(AppCompat.CarouselPageRenderer), typeof(CarouselPageRenderer));
+				RegisterHandlerForDefaultRenderer(typeof(Slider), typeof(FastRenderers.SliderRenderer), typeof(SliderRenderer));
 
 				_renderersAdded = true;
 			}
