@@ -6,7 +6,7 @@ using Xamarin.UITest.Queries;
 
 namespace Xamarin.Forms.Core.UITests
 {
-	internal abstract class BaseViewContainerRemote
+	internal abstract partial class BaseViewContainerRemote
 	{
 		//bool requiresDismissal;
 		protected IApp App { get; private set; }
@@ -121,17 +121,8 @@ namespace Xamarin.Forms.Core.UITests
 			return App.Query(q => q.Raw(ContainerDescendents));
 		}
 
-		public T GetProperty<T>(BindableProperty formProperty)
+		string UpdateQuery(string query, bool isOnParentRenderer)
 		{
-#if __ANDROID__
-			
-#endif
-
-			Tuple<string[], bool> property = formProperty.GetPlatformPropertyQuery();
-			string[] propertyPath = property.Item1;
-			bool isOnParentRenderer = property.Item2;
-
-			var query = ViewQuery;
 			if (isOnParentRenderer && 
 				PlatformViewType != PlatformViews.BoxView && 
 				PlatformViewType != PlatformViews.Frame)
@@ -153,21 +144,32 @@ namespace Xamarin.Forms.Core.UITests
 #endif
 			}
 
-			object prop = null;
-			bool found = false;
+			return query;
+		}
 
-			bool isEdgeCase = false;
+		public T GetProperty<T>(BindableProperty formProperty)
+		{
+			Tuple<string[], bool> property = formProperty.GetPlatformPropertyQuery();
+			string[] propertyPath = property.Item1;
+			bool isOnParentRenderer = property.Item2;
+
+			var query = UpdateQuery(ViewQuery, isOnParentRenderer);
+
+			object prop;
+			T result;
+
 #if __ANDROID__
-			isEdgeCase = (formProperty == View.ScaleProperty);
-#endif
-			if (!isEdgeCase)
+			if (TryConvertViewScale(formProperty, query, out result))
 			{
-				found =
-					MaybeGetProperty<string>(App, query, propertyPath, out prop) ||
-					MaybeGetProperty<float>(App, query, propertyPath, out prop) ||
-					MaybeGetProperty<bool>(App, query, propertyPath, out prop) ||
-					MaybeGetProperty<object>(App, query, propertyPath, out prop);
+				return result;
 			}
+#endif
+			
+			bool found = MaybeGetProperty<string>(App, query, propertyPath, out prop) ||
+						MaybeGetProperty<float>(App, query, propertyPath, out prop) ||
+						MaybeGetProperty<bool>(App, query, propertyPath, out prop) ||
+						MaybeGetProperty<object>(App, query, propertyPath, out prop);
+			
 #if __MACOS__
 			if (!found)
 			{
@@ -188,17 +190,6 @@ namespace Xamarin.Forms.Core.UITests
 			}
 #endif
 
-#if __ANDROID__
-			if (formProperty == View.ScaleProperty) {
-				var matrix = new Matrix ();
-				matrix.M00 = App.Query (q => q.Raw (query).Invoke (propertyPath[0]).Value<float> ()).First ();
-				matrix.M11 = App.Query (q => q.Raw (query).Invoke (propertyPath[1]).Value<float> ()).First ();
-				matrix.M22 = 0.5f;
-				matrix.M33 = 1.0f;
-				return (T)((object)matrix);
-			}
-#endif
-
 			if (!found || prop == null)
 			{
 				throw new NullReferenceException("null property");
@@ -207,22 +198,14 @@ namespace Xamarin.Forms.Core.UITests
 			if (prop.GetType() == typeof(T))
 				return (T)prop;
 
-			if (prop.GetType() == typeof(string) && typeof(T) == typeof(Matrix))
+			if (TryConvertMatrix(prop, out result))
 			{
-				Matrix matrix = ParsingUtils.ParseCATransform3D((string)prop);
-				return (T)((object)matrix);
+				return result;
 			}
 
-			if (typeof(T) == typeof(Color))
+			if (TryConvertColor(prop, out result))
 			{
-#if __IOS__
-				Color color = ParsingUtils.ParseUIColor((string)prop);
-				return (T)((object)color);
-#else
-				uint intColor = (uint)((float)prop);
-				Color color = Color.FromUint (intColor);
-				return (T)((object)color);
-#endif
+				return result;
 			}
 
 #if __IOS__
@@ -233,7 +216,52 @@ namespace Xamarin.Forms.Core.UITests
 			}
 #endif
 
-			T result = default(T);
+			if (TryConvertBool(prop, out result))
+			{
+				return result;
+			}
+
+			return result;
+		}
+
+		static bool TryConvertMatrix<T>(object prop, out T result)
+		{
+			result = default(T);
+
+			if (prop.GetType() == typeof(string) && typeof(T) == typeof(Matrix))
+			{
+				Matrix matrix = ParsingUtils.ParseCATransform3D((string)prop);
+				result =  (T)((object)matrix);
+				return true;
+			}
+
+			return false;
+		}
+
+		static bool TryConvertColor<T>(object prop, out T result)
+		{
+			result = default(T);
+
+			if (typeof(T) == typeof(Color))
+			{
+#if __IOS__
+				Color color = ParsingUtils.ParseUIColor((string)prop);
+				result = (T)((object)color);
+				return true;
+#else
+				uint intColor = (uint)((float)prop);
+				Color color = Color.FromUint(intColor);
+				result = (T)((object)color);
+				return true;
+#endif
+			}
+
+			return false;
+		}
+
+		static bool  TryConvertBool<T>(object prop, out T result)
+		{
+			result = default(T);
 
 			var stringToBoolConverter = new StringToBoolConverter();
 			var floatToBoolConverter = new FloatToBoolConverter();
@@ -241,13 +269,16 @@ namespace Xamarin.Forms.Core.UITests
 			if (stringToBoolConverter.CanConvertTo(prop, typeof(bool)))
 			{
 				result = (T)stringToBoolConverter.ConvertTo(prop, typeof(bool));
-			}
-			else if (floatToBoolConverter.CanConvertTo(prop, typeof(bool)))
-			{
-				result = (T)floatToBoolConverter.ConvertTo(prop, typeof(bool));
+				return true;
 			}
 
-			return result;
+			if (floatToBoolConverter.CanConvertTo(prop, typeof(bool)))
+			{
+				result = (T)floatToBoolConverter.ConvertTo(prop, typeof(bool));
+				return true;
+			}
+
+			return false;
 		}
 
 		static bool MaybeGetProperty<T>(IApp app, string query, string[] propertyPath, out object result)
