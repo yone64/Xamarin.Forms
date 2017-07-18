@@ -121,7 +121,7 @@ namespace Xamarin.Forms.Core.UITests
 			return App.Query(q => q.Raw(ContainerDescendents));
 		}
 
-		string UpdateQuery(string query, bool isOnParentRenderer)
+		string UpdateQueryForParent(string query, bool isOnParentRenderer)
 		{
 			if (isOnParentRenderer && 
 				PlatformViewType != PlatformViews.BoxView && 
@@ -129,16 +129,7 @@ namespace Xamarin.Forms.Core.UITests
 			{
 
 #if __ANDROID__
-				// If we're testing the fast renderers, we don't want to check the parent control for
-				// this property (despite `isOnParentRenderer` being true); if we're testing a legacy
-				// renderer, then we *do* need to check the parent control for the property
-				// So we query the control's parent and see if it's a Container (legacy); if so, 
-				// we adjust the query to look at the parent of the current control
-				var parent = App.Query(appQuery => appQuery.Raw(ViewQuery + " parent * index:0"));
-				if (parent.Length > 0 && parent[0].Label.EndsWith(ContainerLabel))
-				{
-					query = query + " parent * index:0";
-				}
+				query = AccountForFastRenderers(query);
 #else
 				query = query + " parent * index:0";
 #endif
@@ -153,7 +144,7 @@ namespace Xamarin.Forms.Core.UITests
 			string[] propertyPath = property.Item1;
 			bool isOnParentRenderer = property.Item2;
 
-			var query = UpdateQuery(ViewQuery, isOnParentRenderer);
+			var query = UpdateQueryForParent(ViewQuery, isOnParentRenderer);
 
 			object prop;
 			T result;
@@ -173,20 +164,7 @@ namespace Xamarin.Forms.Core.UITests
 #if __MACOS__
 			if (!found)
 			{
-
-				if (formProperty == View.IsEnabledProperty)
-				{
-					var view = App.Query((arg) => arg.Raw(query)).FirstOrDefault();
-					found = view != null;
-					prop = view.Enabled;
-				}
-
-				if (formProperty == Button.TextProperty)
-				{
-					var view = App.Query((arg) => arg.Raw(query)).FirstOrDefault();
-					found = view != null;
-					prop = view.Text;
-				}
+				found = CheckOtherProperties(App, formProperty, query, out prop);
 			}
 #endif
 
@@ -209,10 +187,10 @@ namespace Xamarin.Forms.Core.UITests
 			}
 
 #if __IOS__
-			if (prop.GetType() == typeof(string) && typeof(T) == typeof(Font))
+
+			if (TryConvertFont(prop, out result))
 			{
-				Font font = ParsingUtils.ParseUIFont((string)prop);
-				return (T)((object)font);
+				return result;
 			}
 #endif
 
@@ -259,7 +237,7 @@ namespace Xamarin.Forms.Core.UITests
 			return false;
 		}
 
-		static bool  TryConvertBool<T>(object prop, out T result)
+		static bool TryConvertBool<T>(object prop, out T result)
 		{
 			result = default(T);
 
