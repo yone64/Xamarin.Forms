@@ -58,11 +58,11 @@ namespace Xamarin.Forms.Core.UITests
 
 		public virtual void GoTo([CallerMemberName] string callerMemberName = "")
 		{
-			var scrollBounds = App.Query(Queries.PageWithoutNavigationBar()).First().Rect;
-
 			// Scroll using gutter to the right of view, avoid scrolling inside of WebView
 			if (PlatformViewType == PlatformViews.WebView)
 			{
+				var scrollBounds = App.Query(Queries.PageWithoutNavigationBar()).First().Rect;
+
 				scrollBounds = new AppRect
 				{
 					X = scrollBounds.Width - 20,

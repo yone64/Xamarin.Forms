@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -34,6 +35,8 @@ namespace Xamarin.Forms.Core.UITests
 
 			// Make sure we're at the start screen
 			Session?.Keyboard.PressKey(Keys.Escape);
+
+			
 
 			return new WinDriverApp(Session);
 		}
@@ -139,21 +142,44 @@ namespace Xamarin.Forms.Core.UITests
 			return QueryWindows(winQuery);
 		}
 
-		// TODO hartez 2017/07/13 18:16:20 Make this actually work	
-		AppResult Convert(WindowsElement windowsElement)
+		static AppRect ToAppRect(WindowsElement windowsElement)
 		{
-			return null;
+			var result = new AppRect
+			{
+				X = windowsElement.Location.X,
+				Y = windowsElement.Location.Y,
+				Height = windowsElement.Size.Height,
+				Width = windowsElement.Size.Width
+			};
+
+			result.CenterX = result.X + result.Width / 2;
+			result.CenterY = result.Y + result.CenterY / 2;
+			
+			return result;
+		}
+
+		static AppResult ToAppResult(WindowsElement windowsElement)
+		{
+			return new AppResult
+			{
+				Rect = ToAppRect(windowsElement),
+				Label = windowsElement.Id, // Not entirely sure about this one
+				Description = windowsElement.Text, // or this one
+				Enabled = windowsElement.Enabled,
+				Id = windowsElement.Id
+			};
 		}
 
 		public AppResult[] Query(Func<AppQuery, AppQuery> query = null)
 		{
 			var elements = QueryWindows(new WinQuery(query));
-			return elements.Select(Convert).ToArray();
+			return elements.Select(ToAppResult).ToArray();
 		}
 
 		public AppResult[] Query(string marked)
 		{
-			throw new NotImplementedException();
+			var elements = QueryWindows(marked);
+			return elements.Select(ToAppResult).ToArray();
 		}
 
 		public AppWebResult[] Query(Func<AppQuery, AppWebQuery> query)
@@ -377,14 +403,14 @@ namespace Xamarin.Forms.Core.UITests
 			TimeSpan? timeout = null, TimeSpan? retryFrequency = null, TimeSpan? postTimeout = null)
 		{
 			Func<ReadOnlyCollection<WindowsElement>> result = () => QueryWindows(query);
-			return WaitForAtLeastOne(result, timeoutMessage, timeout, retryFrequency).Select(Convert).ToArray();
+			return WaitForAtLeastOne(result, timeoutMessage, timeout, retryFrequency).Select(ToAppResult).ToArray();
 		}
 
 		public AppResult[] WaitForElement(string marked, string timeoutMessage = "Timed out waiting for element...",
 			TimeSpan? timeout = null, TimeSpan? retryFrequency = null, TimeSpan? postTimeout = null)
 		{
 			Func<ReadOnlyCollection<WindowsElement>> result = () => QueryWindows(marked);
-			return WaitForAtLeastOne(result, timeoutMessage, timeout, retryFrequency).Select(Convert).ToArray();
+			return WaitForAtLeastOne(result, timeoutMessage, timeout, retryFrequency).Select(ToAppResult).ToArray();
 		}
 
 		public AppWebResult[] WaitForElement(Func<AppQuery, AppWebQuery> query, string timeoutMessage = "Timed out waiting for element...",
@@ -415,7 +441,12 @@ namespace Xamarin.Forms.Core.UITests
 
 		public FileInfo Screenshot(string title)
 		{
-			throw new NotImplementedException();
+			// TODO hartez 2017/07/18 10:16:56 Verify that this is working; seems a bit too simple	
+			var filename = $"{title}.png";
+
+			var screenshot = _session.GetScreenshot();
+			screenshot.SaveAsFile(filename, ImageFormat.Png);
+			return new FileInfo(filename);
 		}
 
 		public void SwipeRight()
@@ -548,12 +579,20 @@ namespace Xamarin.Forms.Core.UITests
 
 		public void SetOrientationPortrait()
 		{
-			throw new NotImplementedException();
+			// Deliberately leaving this as a no-op for now
+			// Trying to set the orientation on the Desktop (the only version of UWP we're testing for the moment)
+			// gives us a 405 Method Not Allowed, which makes sense. Haven't figured out how to determine
+			// whether we're in a mode which allows orientation, but if we were, the next line is probably how to set it.
+			//_session.Orientation = ScreenOrientation.Portrait;
 		}
 
 		public void SetOrientationLandscape()
 		{
-			throw new NotImplementedException();
+			// Deliberately leaving this as a no-op for now
+			// Trying to set the orientation on the Desktop (the only version of UWP we're testing for the moment)
+			// gives us a 405 Method Not Allowed, which makes sense. Haven't figured out how to determine
+			// whether we're in a mode which allows orientation, but if we were, the next line is probably how to set it.
+			//_session.Orientation = ScreenOrientation.Landscape;
 		}
 
 		public void Repl()
