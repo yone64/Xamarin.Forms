@@ -53,16 +53,6 @@ namespace Xamarin.Forms.Core.UITests
 			_session = session;
 		}
 
-		string GetRawQuery(Func<AppQuery, AppQuery> query = null)
-		{
-			if (query == null)
-			{
-				return string.Empty;
-			}
-
-			return query(new AppQuery(QueryPlatform.iOS)).ToString();
-		}
-
 		readonly Dictionary<string, string> _controlNameToTag = new Dictionary<string, string>
 		{
             {"button", "ControlType.Button"} 
@@ -87,16 +77,38 @@ namespace Xamarin.Forms.Core.UITests
 
 		class WinQuery
 		{
-			public WinQuery(string rawQuery)
+			public WinQuery(Func<AppQuery, AppQuery> query)
 			{
-				var spaceIndex = rawQuery.IndexOf(" ", StringComparison.Ordinal);
-				ControlType = rawQuery.Substring(0, spaceIndex);
-				Marked = rawQuery.Substring(spaceIndex).Replace("marked:'", "").Replace("'", "").Trim(); // TODO hartez that's just ... awful
+				Raw = GetRawQuery(query);
+				Debug.WriteLine($">>>>> Converting raw query '{Raw}' to {nameof(WinQuery)}");
+				var spaceIndex = Raw.IndexOf(" ", StringComparison.Ordinal);
+				ControlType = Raw.Substring(0, spaceIndex);
+				Marked = Raw.Substring(spaceIndex).Replace("marked:'", "").Replace("'", "").Trim(); // TODO hartez that's just ... awful
+			}
+
+			public WinQuery(string marked)
+			{
+				ControlType = "*";
+				Marked = marked;
+
+				Raw = $"* '{marked}'";
+			}
+
+			string GetRawQuery(Func<AppQuery, AppQuery> query = null)
+			{
+				if (query == null)
+				{
+					return string.Empty;
+				}
+
+				return query(new AppQuery(QueryPlatform.iOS)).ToString();
 			}
 
 			public string ControlType { get; }
 
 			public string Marked { get; }
+
+			public string Raw { get; }
 
 			public override string ToString()
 			{
@@ -104,20 +116,27 @@ namespace Xamarin.Forms.Core.UITests
 			}
 		}
 
-		ReadOnlyCollection<WindowsElement> QueryWindows(string rawQuery)
+		ReadOnlyCollection<WindowsElement> QueryWindows(WinQuery query)
 		{
-			Debug.WriteLine($">>>>> WinDriverApp WinQuery 60: Raw query is '{rawQuery}'");
+			var resultByName = _session.FindElementsByName(query.Marked);
+			var resultByAccessibilityId = _session.FindElementsByAccessibilityId(query.Marked);
+			
+			var result = resultByName
+				.Concat(resultByAccessibilityId);
 
-			var winQuery = new WinQuery(rawQuery);
+			return FilterControlType(result, query.ControlType);
+		}
 
-			Debug.WriteLine($">>>>> Windows query is {winQuery}");
-		
-			var resultByName = _session.FindElementsByName(winQuery.Marked);
-			var resultByAutomationId = _session.FindElementsByAccessibilityId(winQuery.Marked);
+		ReadOnlyCollection<WindowsElement> QueryWindows(string marked)
+		{
+			var winQuery = new WinQuery(marked);
+			return QueryWindows(winQuery);
+		}
 
-			var result = resultByName.Concat(resultByAutomationId);
-
-			return FilterControlType(result, winQuery.ControlType);
+		ReadOnlyCollection<WindowsElement> QueryWindows(Func<AppQuery, AppQuery> query)
+		{
+			var winQuery = new WinQuery(query);
+			return QueryWindows(winQuery);
 		}
 
 		// TODO hartez 2017/07/13 18:16:20 Make this actually work	
@@ -128,10 +147,7 @@ namespace Xamarin.Forms.Core.UITests
 
 		public AppResult[] Query(Func<AppQuery, AppQuery> query = null)
 		{
-			var raw = GetRawQuery(query);
-
-			var elements = QueryWindows(raw);
-
+			var elements = QueryWindows(new WinQuery(query));
 			return elements.Select(Convert).ToArray();
 		}
 
@@ -172,7 +188,7 @@ namespace Xamarin.Forms.Core.UITests
 
 		public void EnterText(Func<AppQuery, AppQuery> query, string text)
 		{
-			QueryWindows(GetRawQuery(query)).First().SendKeys(text);
+			QueryWindows(query).First().SendKeys(text);
 		}
 
 		public void EnterText(string marked, string text)
@@ -217,21 +233,28 @@ namespace Xamarin.Forms.Core.UITests
 
 		public void Tap(Func<AppQuery, AppQuery> query)
 		{
-			var results = QueryWindows(GetRawQuery(query));
+			var winQuery = new WinQuery(query);
+			Tap(winQuery);
+		}
+
+		public void Tap(string marked)
+		{
+			var winQuery = new WinQuery(marked);
+			Tap(winQuery);
+		}
+
+		void Tap(WinQuery query)
+		{
+			Func<ReadOnlyCollection<WindowsElement>> fquery = () => QueryWindows(query);
+
+			var timeoutMessage = $"Timed out waiting for element: {query.Raw}";
+
+			var results = WaitForAtLeastOne(fquery, timeoutMessage);
 
 			if (results.Any())
 			{
 				results.First().Click();
 			}
-			else
-			{
-				// TODO hartez 2017/07/13 18:19:04 Throw exception	
-			}
-		}
-
-		public void Tap(string marked)
-		{
-			throw new NotImplementedException();
 		}
 
 		public void Tap(Func<AppQuery, AppWebQuery> query)
@@ -310,35 +333,28 @@ namespace Xamarin.Forms.Core.UITests
 			throw new NotImplementedException();
 		}
 
-		AppResult[] WaitForAtLeastOne(Func<ReadOnlyCollection<WindowsElement>> query,
-			string timeoutMessage = "Timed out waiting for element...",
+		ReadOnlyCollection<WindowsElement> WaitForAtLeastOne(Func<ReadOnlyCollection<WindowsElement>> query,
+			string timeoutMessage = null,
 			TimeSpan? timeout = null, TimeSpan? retryFrequency = null)
 		{
 			return Wait(query, i => i > 0, timeoutMessage, timeout, retryFrequency);
 		}
 
 		void WaitForNone(Func<ReadOnlyCollection<WindowsElement>> query,
-			string timeoutMessage = "Timed out waiting for element...",
+			string timeoutMessage = null,
 			TimeSpan? timeout = null, TimeSpan? retryFrequency = null)
 		{
 			Wait(query, i => i == 0, timeoutMessage, timeout, retryFrequency);
 		}
 
-
-		AppResult[] Wait(Func<ReadOnlyCollection<WindowsElement>> query,
+		ReadOnlyCollection<WindowsElement> Wait(Func<ReadOnlyCollection<WindowsElement>> query,
 			Func<int, bool> satisfactory,
-			string timeoutMessage = "Timed out waiting for element...",
+			string timeoutMessage = null,
 			TimeSpan? timeout = null, TimeSpan? retryFrequency = null)
 		{
-			if (timeout == null)
-			{
-				timeout = TimeSpan.FromSeconds(5);
-			}
-
-			if (retryFrequency == null)
-			{
-				retryFrequency = TimeSpan.FromMilliseconds(500);
-			}
+			timeout = timeout ?? TimeSpan.FromSeconds(5);
+			retryFrequency = retryFrequency ?? TimeSpan.FromMilliseconds(500);
+			timeoutMessage = timeoutMessage ?? "Timed out on query.";
 
 			var start = DateTime.Now;
 
@@ -354,22 +370,21 @@ namespace Xamarin.Forms.Core.UITests
 				Task.Delay(retryFrequency.Value.Milliseconds).Wait();
 			}
 
-			return result.Select(Convert).ToArray();
+			return result;
 		}
 
 		public AppResult[] WaitForElement(Func<AppQuery, AppQuery> query, string timeoutMessage = "Timed out waiting for element...",
 			TimeSpan? timeout = null, TimeSpan? retryFrequency = null, TimeSpan? postTimeout = null)
 		{
-			var rawQuery = GetRawQuery(query);
-			Func<ReadOnlyCollection<WindowsElement>> result = () => QueryWindows(rawQuery);
-			return WaitForAtLeastOne(result, $"{timeoutMessage} {rawQuery}", timeout, retryFrequency);
+			Func<ReadOnlyCollection<WindowsElement>> result = () => QueryWindows(query);
+			return WaitForAtLeastOne(result, timeoutMessage, timeout, retryFrequency).Select(Convert).ToArray();
 		}
 
 		public AppResult[] WaitForElement(string marked, string timeoutMessage = "Timed out waiting for element...",
 			TimeSpan? timeout = null, TimeSpan? retryFrequency = null, TimeSpan? postTimeout = null)
 		{
-			Func<ReadOnlyCollection<WindowsElement>> result = () => _session.FindElementsByName(marked);
-			return WaitForAtLeastOne(result, $"{timeoutMessage} {marked}", timeout, retryFrequency);
+			Func<ReadOnlyCollection<WindowsElement>> result = () => QueryWindows(marked);
+			return WaitForAtLeastOne(result, timeoutMessage, timeout, retryFrequency).Select(Convert).ToArray();
 		}
 
 		public AppWebResult[] WaitForElement(Func<AppQuery, AppWebQuery> query, string timeoutMessage = "Timed out waiting for element...",
@@ -381,16 +396,15 @@ namespace Xamarin.Forms.Core.UITests
 		public void WaitForNoElement(Func<AppQuery, AppQuery> query, string timeoutMessage = "Timed out waiting for no element...",
 			TimeSpan? timeout = null, TimeSpan? retryFrequency = null, TimeSpan? postTimeout = null)
 		{
-			var rawQuery = GetRawQuery(query);
-			Func<ReadOnlyCollection<WindowsElement>> result = () => QueryWindows(rawQuery);
-			WaitForNone(result, $"{timeoutMessage} {rawQuery}", timeout, retryFrequency);
+			Func<ReadOnlyCollection<WindowsElement>> result = () => QueryWindows(query);
+			WaitForNone(result, timeoutMessage, timeout, retryFrequency);
 		}
 
 		public void WaitForNoElement(string marked, string timeoutMessage = "Timed out waiting for no element...",
 			TimeSpan? timeout = null, TimeSpan? retryFrequency = null, TimeSpan? postTimeout = null)
 		{
-			Func<ReadOnlyCollection<WindowsElement>> result = () => _session.FindElementsByName(marked);
-			WaitForNone(result, $"{timeoutMessage} {marked}", timeout, retryFrequency);
+			Func<ReadOnlyCollection<WindowsElement>> result = () => QueryWindows(marked);
+			WaitForNone(result, timeoutMessage, timeout, retryFrequency);
 		}
 
 		public void WaitForNoElement(Func<AppQuery, AppWebQuery> query, string timeoutMessage = "Timed out waiting for no element...",
