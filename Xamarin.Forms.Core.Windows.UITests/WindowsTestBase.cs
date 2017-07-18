@@ -183,7 +183,7 @@ namespace Xamarin.Forms.Core.UITests
 
 		public void EnterText(string text)
 		{
-			throw new NotImplementedException();
+			_session.Keyboard.SendKeys(text);
 		}
 
 		public void EnterText(Func<AppQuery, AppQuery> query, string text)
@@ -193,7 +193,7 @@ namespace Xamarin.Forms.Core.UITests
 
 		public void EnterText(string marked, string text)
 		{
-			throw new NotImplementedException();
+			QueryWindows(marked).First().SendKeys(text);
 		}
 
 		public void EnterText(Func<AppQuery, AppWebQuery> query, string text)
@@ -223,7 +223,7 @@ namespace Xamarin.Forms.Core.UITests
 
 		public void PressEnter()
 		{
-			throw new NotImplementedException();
+			_session.Keyboard.PressKey(Keys.Enter);
 		}
 
 		public void DismissKeyboard()
