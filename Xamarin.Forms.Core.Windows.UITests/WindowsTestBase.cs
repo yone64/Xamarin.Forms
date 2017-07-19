@@ -6,6 +6,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using OpenQA.Selenium;
@@ -95,13 +96,10 @@ namespace Xamarin.Forms.Core.UITests
 			{
 				Debug.WriteLine($">>>>> Converting raw query '{raw}' to {nameof(WinQuery)}");
 
-				var tokens = raw.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+				var match = Regex.Match(raw, @"(.*)\s(marked|text):'(.*)'");
 
-				var controlType = tokens[0];
-
-				var markedStatement = tokens[1];
-
-				var marked = markedStatement.Substring(8).Replace("'", "");
+				var controlType = match.Groups[1].Captures[0].Value;
+				var marked = match.Groups[3].Captures[0].Value;
 
 				// Just ignoring everything else for now (parent, index statements, etc)
 
