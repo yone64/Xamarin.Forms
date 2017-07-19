@@ -95,6 +95,16 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 			Element = slider;
 		}
 
+		public override bool OnTouchEvent(MotionEvent e)
+		{
+			bool handled;
+
+			// Delegate touch handling to the VER's GestureManager
+			var result = _visualElementRenderer.OnTouchEvent(e, Parent, out handled);
+
+			return handled ? result : base.OnTouchEvent(e);
+		}
+
 		void IVisualElementRenderer.SetLabelFor(int? id)
 		{
 			if (_defaultLabelFor == null)
