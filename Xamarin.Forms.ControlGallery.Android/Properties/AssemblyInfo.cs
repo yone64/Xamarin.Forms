@@ -46,5 +46,6 @@ using Xamarin.Forms.ControlGallery.Android;
 [assembly: ExportRenderer(typeof(Button), typeof(Xamarin.Forms.Platform.Android.AppCompat.ButtonRenderer))]
 [assembly: ExportRenderer(typeof(Image), typeof(Xamarin.Forms.Platform.Android.ImageRenderer))]
 [assembly: ExportRenderer(typeof(Label), typeof(Xamarin.Forms.Platform.Android.LabelRenderer))]
+[assembly: ExportRenderer(typeof(Slider), typeof(Xamarin.Forms.Platform.Android.SliderRenderer))]
 [assembly: ExportRenderer(typeof(Frame), typeof(Xamarin.Forms.Platform.Android.AppCompat.FrameRenderer))]
 #endif
