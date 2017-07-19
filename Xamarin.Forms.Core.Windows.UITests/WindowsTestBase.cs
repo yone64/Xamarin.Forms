@@ -80,24 +80,35 @@ namespace Xamarin.Forms.Core.UITests
 
 		class WinQuery
 		{
-			public WinQuery(Func<AppQuery, AppQuery> query)
+			public static WinQuery FromQuery(Func<AppQuery, AppQuery> query)
 			{
-				Raw = GetRawQuery(query);
-				Debug.WriteLine($">>>>> Converting raw query '{Raw}' to {nameof(WinQuery)}");
-				var spaceIndex = Raw.IndexOf(" ", StringComparison.Ordinal);
-				ControlType = Raw.Substring(0, spaceIndex);
-				Marked = Raw.Substring(spaceIndex).Replace("marked:'", "").Replace("'", "").Trim(); // TODO hartez that's just ... awful
+				var raw = GetRawQuery(query);
+				return FromRaw(raw);
 			}
 
-			public WinQuery(string marked)
+			public static WinQuery FromMarked(string marked)
 			{
-				ControlType = "*";
-				Marked = marked;
-
-				Raw = $"* '{marked}'";
+				return new WinQuery("*", marked, $"* '{marked}'");
 			}
 
-			string GetRawQuery(Func<AppQuery, AppQuery> query = null)
+			public static WinQuery FromRaw(string raw)
+			{
+				Debug.WriteLine($">>>>> Converting raw query '{raw}' to {nameof(WinQuery)}");
+
+				var tokens = raw.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+				var controlType = tokens[0];
+
+				var markedStatement = tokens[1];
+
+				var marked = markedStatement.Substring(8).Replace("'", "");
+
+				// Just ignoring everything else for now (parent, index statements, etc)
+
+				return new WinQuery(controlType, marked, raw);
+			}
+
+			static string GetRawQuery(Func<AppQuery, AppQuery> query = null)
 			{
 				if (query == null)
 				{
@@ -105,6 +116,13 @@ namespace Xamarin.Forms.Core.UITests
 				}
 
 				return query(new AppQuery(QueryPlatform.iOS)).ToString();
+			}
+
+			WinQuery(string controlType, string marked, string raw)
+			{
+				ControlType = controlType;
+				Marked = marked;
+				Raw = raw;
 			}
 
 			public string ControlType { get; }
@@ -132,13 +150,13 @@ namespace Xamarin.Forms.Core.UITests
 
 		ReadOnlyCollection<WindowsElement> QueryWindows(string marked)
 		{
-			var winQuery = new WinQuery(marked);
+			var winQuery = WinQuery.FromMarked(marked);
 			return QueryWindows(winQuery);
 		}
 
 		ReadOnlyCollection<WindowsElement> QueryWindows(Func<AppQuery, AppQuery> query)
 		{
-			var winQuery = new WinQuery(query);
+			var winQuery = WinQuery.FromQuery(query);
 			return QueryWindows(winQuery);
 		}
 
@@ -172,7 +190,7 @@ namespace Xamarin.Forms.Core.UITests
 
 		public AppResult[] Query(Func<AppQuery, AppQuery> query = null)
 		{
-			var elements = QueryWindows(new WinQuery(query));
+			var elements = QueryWindows(WinQuery.FromQuery(query));
 			return elements.Select(ToAppResult).ToArray();
 		}
 
@@ -187,9 +205,44 @@ namespace Xamarin.Forms.Core.UITests
 			throw new NotImplementedException();
 		}
 
+		readonly Dictionary<string, string> _translatePropertyAccessor = new Dictionary<string, string>
+		{
+			{"getAlpha", "Opacity"} 
+		};
+
 		public T[] Query<T>(Func<AppQuery, AppTypedSelector<T>> query)
 		{
-			throw new NotImplementedException();
+			var appTypedSelector = query(new AppQuery(QueryPlatform.iOS));
+
+			// Swiss-Army Chainsaw time
+			// We'll use reflection to dig into the query and get the element selector 
+			// and the property value invocation in text form
+			var bindingFlags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+			var selectorType = appTypedSelector.GetType();
+			var tokensProperty = selectorType.GetProperties(bindingFlags)
+				.First(t => t.PropertyType == typeof(Xamarin.UITest.Queries.Tokens.IQueryToken[]));
+
+			var tokens = (Xamarin.UITest.Queries.Tokens.IQueryToken[])tokensProperty.GetValue(appTypedSelector);
+
+			// Output some debugging info
+			//foreach (var t in tokens)
+			//{
+			//	Debug.WriteLine($">>>>> WinDriverApp Query 208: {t.ToQueryString(QueryPlatform.iOS)}");
+			//	Debug.WriteLine($">>>>> WinDriverApp Query 208: {t.ToCodeString()}");
+			//}
+
+			var selector = tokens[0].ToQueryString(QueryPlatform.iOS);
+			var invoke = tokens[1].ToCodeString();
+			
+			// Now that we have them in text form, we can reinterpret them for Windows
+			var winQuery = WinQuery.FromRaw(selector);
+			// TODO hartez 2017/07/19 17:08:44 Make this a bit more resilient if the translation isn't there	
+			var attribute = _translatePropertyAccessor[invoke.Substring(8).Replace("\")", "")]; 
+
+			var elements = QueryWindows(winQuery);
+
+			// TODO hartez 2017/07/19 17:09:14 Alas, for now this simply doesn't work. Waiting for WinAppDrive to implement it	
+			return elements.Select(e => (T)Convert.ChangeType(e.GetAttribute(attribute), typeof(T))).ToArray();
 		}
 
 		public string[] Query(Func<AppQuery, InvokeJSAppQuery> query)
@@ -259,13 +312,13 @@ namespace Xamarin.Forms.Core.UITests
 
 		public void Tap(Func<AppQuery, AppQuery> query)
 		{
-			var winQuery = new WinQuery(query);
+			var winQuery = WinQuery.FromQuery(query);
 			Tap(winQuery);
 		}
 
 		public void Tap(string marked)
 		{
-			var winQuery = new WinQuery(marked);
+			var winQuery = WinQuery.FromMarked(marked);
 			Tap(winQuery);
 		}
 
