@@ -653,7 +653,7 @@ namespace Xamarin.Forms.Core.UITests
 
 		public void Back()
 		{
-			throw new NotImplementedException();
+			QueryWindows("Back").First().Click();
 		}
 
 		public void PressVolumeUp()
