@@ -7,7 +7,8 @@ using Android.Widget;
 
 namespace Xamarin.Forms.Platform.Android.FastRenderers
 {
-	public class SliderRenderer : SeekBar, IVisualElementRenderer, SeekBar.IOnSeekBarChangeListener
+	public class SliderRenderer : SeekBar, IVisualElementRenderer, IEffectControlProvider,
+		SeekBar.IOnSeekBarChangeListener
 	{
 		int? _defaultLabelFor;
 		bool _disposed;
@@ -15,12 +16,14 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 		double _max, _min;
 		bool _progressChangedOnce;
 
-		VisualElementRenderer _visualElementRenderer;
+		readonly AutomationPropertiesProvider _automationPropertiesProvider;
+		readonly EffectControlProvider _effectControlProvider;
 		VisualElementTracker _visualElementTracker;
 
 		public SliderRenderer() : base(Forms.Context)
 		{
-			_visualElementRenderer = new VisualElementRenderer(this);
+			_automationPropertiesProvider = new AutomationPropertiesProvider(this);
+			_effectControlProvider = new EffectControlProvider(this);
 		}
 
 		protected Slider Element
@@ -65,6 +68,11 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 
 		void IOnSeekBarChangeListener.OnStopTrackingTouch(SeekBar seekBar)
 		{
+		}
+
+		void IEffectControlProvider.RegisterEffect(Effect effect)
+		{
+			_effectControlProvider.RegisterEffect(effect);
 		}
 
 		VisualElement IVisualElementRenderer.Element => Element;
@@ -144,12 +152,8 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 					_visualElementTracker = null;
 				}
 
-				if (_visualElementRenderer != null)
-				{
-					_visualElementRenderer.Dispose();
-					_visualElementRenderer = null;
-				}
-
+				_automationPropertiesProvider?.Dispose();
+				
 				if (Element != null)
 				{
 					Element.PropertyChanged -= OnElementPropertyChanged;
