@@ -142,6 +142,14 @@ namespace Xamarin.Forms.Controls
 					return;
 				}
 #endif
+
+#if __WINDOWS__
+					// Windows doens't have an 'invoke' option right now for us to do the more direct navigation
+					// we're using for Android/iOS
+					// So we're just going to use the 'Reset' method to bounce the app to the opening screen
+					// and then fall back to the old manual navigation
+					WindowsTestBase.Reset();
+#endif
 				}
 				catch (Exception ex)
 				{

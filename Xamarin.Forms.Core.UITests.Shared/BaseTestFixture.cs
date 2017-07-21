@@ -106,7 +106,7 @@ namespace Xamarin.Forms.Core.UITests
 			App.Invoke("Reset");
 #endif
 #if __WINDOWS__
-			WindowsTestBase.TearDown();
+			WindowsTestBase.Reset();
 #endif
 		}
 	}

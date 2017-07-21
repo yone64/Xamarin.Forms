@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Resources;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -24,7 +25,6 @@ namespace Xamarin.Forms.Core.UITests
 	{
 		protected const string WindowsApplicationDriverUrl = "http://127.0.0.1:4723";
 		protected static WindowsDriver<WindowsElement> Session;
-		
 
 		public static IApp ConfigureApp()
 		{
@@ -35,18 +35,24 @@ namespace Xamarin.Forms.Core.UITests
 				appCapabilities.SetCapability("deviceName", "WindowsPC");
 				Session = new WindowsDriver<WindowsElement>(new Uri(WindowsApplicationDriverUrl), appCapabilities);
 				Assert.IsNotNull(Session);
-				Session.Manage().Timeouts().ImplicitlyWait(TimeSpan.FromSeconds(4));
+				Session.Manage().Timeouts().ImplicitlyWait(TimeSpan.FromSeconds(2));
+				Reset();
 			}
-
-			// Make sure we're at the start screen
-			Session?.Keyboard.PressKey(Keys.Escape);
-
+			
 			return new WinDriverApp(Session);
 		}
 
-		public static void TearDown()
+		public static void Reset()
 		{
-			Session?.Keyboard.PressKey(Keys.Escape);
+			try
+			{
+				Session?.Keyboard?.PressKey(Keys.Escape);
+			}
+			catch (Exception ex)
+			{
+				Debug.WriteLine($">>>>> WindowsTestBase ConfigureApp 49: {ex}");
+				throw;
+			}
 		}
 	}
 
