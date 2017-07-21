@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Diagnostics;
 using Windows.Foundation;
+using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Automation.Peers;
 using Windows.UI.Xaml.Media;
@@ -35,6 +36,17 @@ namespace Xamarin.Forms.Platform.WinRT
 				{
 					SetAutomationId(Element.AutomationId);
 				}
+			}
+		}
+
+		protected override void UpdateBackgroundColor()
+		{
+			base.UpdateBackgroundColor();
+
+			if (GetValue(BackgroundProperty) == null && Children.Count == 0)
+			{
+				// Forces the layout to take up actual space if it's otherwise empty
+				Background = new SolidColorBrush(Colors.Transparent);
 			}
 		}
 
