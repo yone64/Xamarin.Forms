@@ -336,7 +336,7 @@ namespace Xamarin.Forms.Core.UITests
 			Tap(winQuery);
 		}
 
-		void Tap(WinQuery query)
+		void Tap(WinQuery query, int taps = 1)
 		{
 			Func<ReadOnlyCollection<WindowsElement>> fquery = () => QueryWindows(query);
 
@@ -346,7 +346,12 @@ namespace Xamarin.Forms.Core.UITests
 
 			if (results.Any())
 			{
-				results.First().Click();
+				var element = results.First();
+
+				for (int n = 0; n < taps; n++)
+				{
+					element.Click();
+				}
 			}
 		}
 
@@ -399,12 +404,14 @@ namespace Xamarin.Forms.Core.UITests
 
 		public void DoubleTap(Func<AppQuery, AppQuery> query)
 		{
-			throw new NotImplementedException();
+			var winQuery = WinQuery.FromQuery(query);
+			Tap(winQuery, 2);
 		}
 
 		public void DoubleTap(string marked)
 		{
-			throw new NotImplementedException();
+			var winQuery = WinQuery.FromMarked(marked);
+			Tap(winQuery, 2);
 		}
 
 		public void DoubleTapCoordinates(float x, float y)
