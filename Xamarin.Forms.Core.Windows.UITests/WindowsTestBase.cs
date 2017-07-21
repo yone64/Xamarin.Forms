@@ -315,7 +315,7 @@ namespace Xamarin.Forms.Core.UITests
 
 		public void DismissKeyboard()
 		{
-			throw new NotImplementedException();
+			// No-op for Desktop, which is all we're doing right now
 		}
 
 		public void Tap(Func<AppQuery, AppQuery> query)
