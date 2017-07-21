@@ -10,8 +10,11 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using OpenQA.Selenium;
+using OpenQA.Selenium.Appium.MultiTouch;
 using OpenQA.Selenium.Appium.Windows;
+using OpenQA.Selenium.Interactions.Internal;
 using OpenQA.Selenium.Remote;
+using Xamarin.Forms.Xaml;
 using Xamarin.UITest;
 using Xamarin.UITest.Queries;
 
@@ -21,6 +24,7 @@ namespace Xamarin.Forms.Core.UITests
 	{
 		protected const string WindowsApplicationDriverUrl = "http://127.0.0.1:4723";
 		protected static WindowsDriver<WindowsElement> Session;
+		
 
 		public static IApp ConfigureApp()
 		{
@@ -37,8 +41,6 @@ namespace Xamarin.Forms.Core.UITests
 			// Make sure we're at the start screen
 			Session?.Keyboard.PressKey(Keys.Escape);
 
-			
-
 			return new WinDriverApp(Session);
 		}
 
@@ -51,10 +53,12 @@ namespace Xamarin.Forms.Core.UITests
 	public class WinDriverApp : IApp
 	{
 	    readonly WindowsDriver<WindowsElement> _session;
+		protected static RemoteTouchScreen _touchScreen;
 
 		public WinDriverApp(WindowsDriver<WindowsElement> session)
 		{
 			_session = session;
+			_touchScreen = new RemoteTouchScreen(session);
 		}
 
 		readonly Dictionary<string, string> _controlNameToTag = new Dictionary<string, string>
@@ -341,7 +345,27 @@ namespace Xamarin.Forms.Core.UITests
 
 		public void TapCoordinates(float x, float y)
 		{
-			throw new NotImplementedException();
+			// Okay, this one's a bit complicated. For some reason, _session.Tap() with coordinates does not work
+			// (Filed https://github.com/Microsoft/WinAppDriver/issues/229 for that)
+			// But we can do the equivalent by manipulating the mouse. The mouse methods all take an ICoordinates
+			// object, and you'd think that the "coordinates" part of ICoordinates would have something do with 
+			// where the mouse clicks. You'd be wrong. The coordinates parts of that object are ignored and it just
+			// clicks the center of whatever WindowsElement the ICoordinates refers to in 'AuxiliaryLocator'
+
+			// If we could just use the element, we wouldn't be tapping at specific coordinates, so that's not 
+			// very helpful.
+
+			// So here's how we're working around it for the moment:
+			// 1. Get the Window viewport (which is a known-to-exist element)
+			// 2. Using the Window's ICoordinates and the MouseMove() overload with x/y offsets, move the pointer
+			//		to the location we care about
+			// 3. Use the (undocumented, except in https://github.com/Microsoft/WinAppDriver/issues/118#issuecomment-269404335)
+			//		null parameter for Mouse.Click() to click at the current pointer location
+			
+			var candidates = QueryWindows("Xamarin.Forms.ControlGallery.WindowsUniversal");
+			var window = candidates[3]; // We really just want the viewport; skip the full window, title bar, min/max buttons...
+			_session.Mouse.MouseMove(window.Coordinates, (int)x, (int)y);
+			_session.Mouse.Click(null);
 		}
 
 		public void TouchAndHold(Func<AppQuery, AppQuery> query)
