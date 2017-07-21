@@ -149,9 +149,15 @@ namespace Xamarin.Forms.Core.UITests
 		{
 			var resultByName = _session.FindElementsByName(query.Marked);
 			var resultByAccessibilityId = _session.FindElementsByAccessibilityId(query.Marked);
-			
+
 			var result = resultByName
 				.Concat(resultByAccessibilityId);
+
+			if (query.ControlType == "*")
+			{
+				var textBoxesByContent = _session.FindElementsByClassName("TextBox").Where(e => e.Text == query.Marked);
+				result = result.Concat(textBoxesByContent);
+			}
 
 			return FilterControlType(result, query.ControlType);
 		}
