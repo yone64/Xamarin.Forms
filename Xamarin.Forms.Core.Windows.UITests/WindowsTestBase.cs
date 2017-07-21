@@ -173,7 +173,7 @@ namespace Xamarin.Forms.Core.UITests
 			};
 
 			result.CenterX = result.X + result.Width / 2;
-			result.CenterY = result.Y + result.CenterY / 2;
+			result.CenterY = result.Y + result.Height / 2;
 			
 			return result;
 		}
@@ -363,8 +363,10 @@ namespace Xamarin.Forms.Core.UITests
 			//		null parameter for Mouse.Click() to click at the current pointer location
 			
 			var candidates = QueryWindows("Xamarin.Forms.ControlGallery.WindowsUniversal");
-			var window = candidates[3]; // We really just want the viewport; skip the full window, title bar, min/max buttons...
-			_session.Mouse.MouseMove(window.Coordinates, (int)x, (int)y);
+			var viewPort = candidates[3]; // We really just want the viewport; skip the full window, title bar, min/max buttons...
+			var xOffset = viewPort.Coordinates.LocationInViewport.X;
+			var yOffset = viewPort.Coordinates.LocationInViewport.Y;
+			_session.Mouse.MouseMove(viewPort.Coordinates, (int)x - xOffset, (int)y - yOffset);
 			_session.Mouse.Click(null);
 		}
 
