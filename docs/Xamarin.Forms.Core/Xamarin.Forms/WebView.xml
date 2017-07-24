@@ -210,7 +210,7 @@ namespace FormsGallery
         <ReturnType>System.EventHandler&lt;Xamarin.Forms.Internals.EvalRequested&gt;</ReturnType>
       </ReturnValue>
       <Docs>
-        <summary>To be added.</summary>
+        <summary>For internal use by the Xamarin.Forms platform.</summary>
         <remarks>To be added.</remarks>
       </Docs>
     </Member>
@@ -249,7 +249,7 @@ namespace FormsGallery
         <ReturnType>System.EventHandler</ReturnType>
       </ReturnValue>
       <Docs>
-        <summary>To be added.</summary>
+        <summary>For internal use by the Xamarin.Forms platform.</summary>
         <remarks>To be added.</remarks>
       </Docs>
     </Member>
@@ -288,7 +288,7 @@ namespace FormsGallery
         <ReturnType>System.EventHandler</ReturnType>
       </ReturnValue>
       <Docs>
-        <summary>To be added.</summary>
+        <summary>For internal use by the Xamarin.Forms platform.</summary>
         <remarks>To be added.</remarks>
       </Docs>
     </Member>
@@ -389,7 +389,7 @@ namespace FormsGallery
         <Parameter Name="propertyName" Type="System.String" />
       </Parameters>
       <Docs>
-        <param name="propertyName">To be added.</param>
+        <param name="propertyName">The name of the property that was changed.</param>
         <summary>Method that is called when <see cref="P:Xamarin.Forms.WebView.Source" /> is changed.</summary>
         <remarks>To be added.</remarks>
       </Docs>
@@ -415,8 +415,8 @@ namespace FormsGallery
         <Parameter Name="e" Type="System.EventArgs" />
       </Parameters>
       <Docs>
-        <param name="sender">To be added.</param>
-        <param name="e">To be added.</param>
+        <param name="sender">The object that raised the event.</param>
+        <param name="e">The event arguments.</param>
         <summary>Method that is called when the view source that is specified by the <paramref name="sender" /> parameter is changed.</summary>
         <remarks>To be added.</remarks>
       </Docs>
@@ -440,8 +440,8 @@ namespace FormsGallery
         <Parameter Name="args" Type="Xamarin.Forms.WebNavigatedEventArgs" />
       </Parameters>
       <Docs>
-        <param name="args">To be added.</param>
-        <summary>To be added.</summary>
+        <param name="args">For internal use by the Xamarin.Forms platform.</param>
+        <summary>For internal use by the Xamarin.Forms platform.</summary>
         <remarks>To be added.</remarks>
       </Docs>
     </Member>
@@ -464,8 +464,8 @@ namespace FormsGallery
         <Parameter Name="args" Type="Xamarin.Forms.WebNavigatingEventArgs" />
       </Parameters>
       <Docs>
-        <param name="args">To be added.</param>
-        <summary>To be added.</summary>
+        <param name="args">For internal use by the Xamarin.Forms platform.</param>
+        <summary>For internal use by the Xamarin.Forms platform.</summary>
         <remarks>To be added.</remarks>
       </Docs>
     </Member>

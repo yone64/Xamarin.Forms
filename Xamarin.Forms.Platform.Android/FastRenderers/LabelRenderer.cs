@@ -62,6 +62,11 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 
 		SizeRequest IVisualElementRenderer.GetDesiredSize(int widthConstraint, int heightConstraint)
 		{
+		 	if (_disposed)
+ 			{
+ 				return new SizeRequest();
+ 			}
+		
 			if (_lastSizeRequest.HasValue)
 			{
 				// if we are measuring the same thing, no need to waste the time
@@ -172,6 +177,8 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 
 			if (e.NewElement != null)
 			{
+				this.EnsureId();
+
 				if (_visualElementTracker == null)
 				{
 					_visualElementTracker = new VisualElementTracker(this);
@@ -250,34 +257,7 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 
 		void UpdateLineBreakMode()
 		{
-			SetSingleLine(false);
-			switch (Element.LineBreakMode)
-			{
-				case LineBreakMode.NoWrap:
-					SetMaxLines(1);
-					Ellipsize = null;
-					break;
-				case LineBreakMode.WordWrap:
-					Ellipsize = null;
-					SetMaxLines(100);
-					break;
-				case LineBreakMode.CharacterWrap:
-					Ellipsize = null;
-					SetMaxLines(100);
-					break;
-				case LineBreakMode.HeadTruncation:
-					SetMaxLines(1);
-					Ellipsize = TextUtils.TruncateAt.Start;
-					break;
-				case LineBreakMode.TailTruncation:
-					SetMaxLines(1);
-					Ellipsize = TextUtils.TruncateAt.End;
-					break;
-				case LineBreakMode.MiddleTruncation:
-					SetMaxLines(1);
-					Ellipsize = TextUtils.TruncateAt.Middle;
-					break;
-			}
+			this.SetLineBreakMode(Element.LineBreakMode);
 			_lastSizeRequest = null;
 		}
 
