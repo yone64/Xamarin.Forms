@@ -563,8 +563,8 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 
 			if (rendererToRemove != null)
 			{
-				var containerToRemove = (PageContainer)rendererToRemove.View.Parent;
-				rendererToRemove.View?.RemoveFromParent();
+				var containerToRemove = (PageContainer)rendererToRemove.ViewGroup.Parent;
+				rendererToRemove.ViewGroup?.RemoveFromParent();
 				rendererToRemove?.Dispose();
 				containerToRemove?.RemoveFromParent();
 				containerToRemove?.Dispose();
