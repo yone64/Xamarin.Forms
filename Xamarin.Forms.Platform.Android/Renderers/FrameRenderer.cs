@@ -58,24 +58,26 @@ namespace Xamarin.Forms.Platform.Android
 
 		void UpdateBackground()
 		{
-			this.SetBackground(new FrameDrawable(Element));
+			this.SetBackground(new FrameDrawable(Element, Context));
 		}
 
 		void UpdateCornerRadius()
 		{
-			this.SetBackground(new FrameDrawable(Element));
+			this.SetBackground(new FrameDrawable(Element, Context));
 		}
 
 		class FrameDrawable : Drawable
 		{
 			readonly Frame _frame;
+			readonly Context _context;
 
 			bool _isDisposed;
 			Bitmap _normalBitmap;
 
-			public FrameDrawable(Frame frame)
+			public FrameDrawable(Frame frame, Context context)
 			{
 				_frame = frame;
+				_context = context;
 				frame.PropertyChanged += FrameOnPropertyChanged;
 			}
 
@@ -172,8 +174,8 @@ namespace Xamarin.Forms.Platform.Android
 				using (Paint.Style style = Paint.Style.Fill)
 				using (var rect = new RectF(0, 0, width, height))
 				{
-					float rx = Forms.Context.ToPixels(cornerRadius);
-					float ry = Forms.Context.ToPixels(cornerRadius);
+					float rx = _context.ToPixels(cornerRadius);
+					float ry = _context.ToPixels(cornerRadius);
 					path.AddRoundRect(rect, rx, ry, direction);
 
 					global::Android.Graphics.Color color = _frame.BackgroundColor.ToAndroid();
@@ -193,8 +195,8 @@ namespace Xamarin.Forms.Platform.Android
 				using (Paint.Style style = Paint.Style.Stroke)
 				using (var rect = new RectF(0, 0, width, height))
 				{
-					float rx = Forms.Context.ToPixels(cornerRadius);
-					float ry = Forms.Context.ToPixels(cornerRadius);
+					float rx = _context.ToPixels(cornerRadius);
+					float ry = _context.ToPixels(cornerRadius);
 					path.AddRoundRect(rect, rx, ry, direction);
 
 					paint.StrokeWidth = 1;
