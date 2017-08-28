@@ -1,4 +1,6 @@
+using System;
 using System.ComponentModel;
+using Android.Content;
 using Android.Graphics;
 using Android.Graphics.Drawables;
 using Android.Views;
@@ -12,6 +14,16 @@ namespace Xamarin.Forms.Platform.Android
 	{
 		bool _disposed;
 		readonly MotionEventHelper _motionEventHelper = new MotionEventHelper();
+
+		public FrameRenderer(Context context) : base(context)
+		{
+		}
+
+		[Obsolete("This constructor is obsolete as of version 3.0. Please use FrameRenderer(Context) instead.")]
+		public FrameRenderer()
+		{
+			AutoPackage = false;
+		}
 
 		protected override void Dispose(bool disposing)
 		{
