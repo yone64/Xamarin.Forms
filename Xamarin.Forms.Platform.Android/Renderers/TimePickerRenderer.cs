@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using Android.App;
+using Android.Content;
 using Android.Content.Res;
 using Android.Widget;
 using Android.Text.Format;
@@ -15,6 +16,12 @@ namespace Xamarin.Forms.Platform.Android
 		AlertDialog _dialog;
 		TextColorSwitcher _textColorSwitcher;
 
+		public TimePickerRenderer(Context context) : base(context)
+		{
+			AutoPackage = false;
+		}
+
+		[Obsolete("This constructor is obsolete as of version 3.0. Please use TimePickerRenderer(Context) instead.")]
 		public TimePickerRenderer()
 		{
 			AutoPackage = false;

@@ -46,6 +46,13 @@ namespace Xamarin.Forms.ControlGallery.Android
 		MasterDetailPage _page;
 		bool _disposed;
 
+#pragma warning disable 618
+		public NativeDroidMasterDetail()
+#pragma warning restore 618
+		{
+			System.Diagnostics.Debug.WriteLine($">>>>> NativeDroidMasterDetail NativeDroidMasterDetail 53: This is the obsolete constructor being selected");
+		}
+
 		protected override void OnElementChanged(VisualElement oldElement, VisualElement newElement)
 		{
 			base.OnElementChanged(oldElement, newElement);
@@ -113,7 +120,10 @@ namespace Xamarin.Forms.ControlGallery.Android
 
 	public class NativeListViewRenderer : ViewRenderer<NativeListView, global::Android.Widget.ListView>
 	{
+		// TODO hartez Verifying that this constructor works
+#pragma warning disable 618 
 		public NativeListViewRenderer()
+#pragma warning restore 618
 		{
 		}
 
@@ -289,7 +299,10 @@ namespace Xamarin.Forms.ControlGallery.Android
 
 	public class NativeAndroidListViewRenderer : ViewRenderer<NativeListView2, global::Android.Widget.ListView>
 	{
+
+#pragma warning disable 618
 		public NativeAndroidListViewRenderer()
+#pragma warning restore 618
 		{
 		}
 
@@ -444,8 +457,10 @@ namespace Xamarin.Forms.ControlGallery.Android
 	[Preserve]
 	public class CustomContentRenderer : ViewRenderer
 	{
+#pragma warning disable 618
 		[Preserve]
 		public CustomContentRenderer()
+#pragma warning restore 618
 		{
 			AutoPackage = true;
 		}
@@ -480,7 +495,9 @@ namespace Xamarin.Forms.ControlGallery.Android
 		}
 	}
 
+#pragma warning disable 618
 	public class CustomButtonRenderer : ButtonRenderer
+#pragma warning restore 618
 	{
 		protected override AButton CreateNativeControl()
 		{
@@ -501,7 +518,9 @@ namespace Xamarin.Forms.ControlGallery.Android
 
 	// Custom renderers for Bugzilla42000 demonstration purposes
 
+#pragma warning disable 618
 	public class EntryRendererNoNegative : EntryRenderer
+#pragma warning restore 618
 	{
 		protected override NumberKeyListener GetDigitsKeyListener(InputTypes inputTypes)
 		{
@@ -512,7 +531,9 @@ namespace Xamarin.Forms.ControlGallery.Android
 		}
 	}
 
+#pragma warning disable 618
 	public class EntryRendererNoDecimal : EntryRenderer
+#pragma warning restore 618
 	{
 		protected override NumberKeyListener GetDigitsKeyListener(InputTypes inputTypes)
 		{
@@ -532,7 +553,9 @@ namespace Xamarin.Forms.ControlGallery.Android
 	//	}
  // }
 
+#pragma warning disable 618
 	public class NoFlashTestNavigationPage : Xamarin.Forms.Platform.Android.AppCompat.NavigationPageRenderer
+#pragma warning restore 618
 	{
 		protected override void SetupPageTransition(global::Android.Support.V4.App.FragmentTransaction transaction, bool isPush)
 		{
