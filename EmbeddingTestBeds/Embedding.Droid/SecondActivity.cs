@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
 using Android.App;
 using Android.Content;
-using Android.Widget;
 using Android.OS;
+using Android.Runtime;
 using Android.Support.V4.App;
 using Android.Views;
+using Android.Widget;
 using Embedding.XF;
-using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
 using Fragment = Android.Support.V4.App.Fragment;
 using FragmentTransaction = Android.Support.V4.App.FragmentTransaction;
@@ -15,23 +19,30 @@ using Button = Android.Widget.Button;
 
 namespace Embedding.Droid
 {
-	[Activity(Label = "Embedding.Droid", MainLauncher = true, Icon = "@drawable/icon")]
-	public class MainActivity : FragmentActivity
+	[Activity(Label = "SecondActivity")]
+	public class SecondActivity : FragmentActivity
 	{
 		Fragment _hello;
 		Fragment _alertsAndActionSheets;
 
-		protected override void OnCreate(Bundle bundle)
+		protected override void OnCreate(Bundle savedInstanceState)
 		{
-			base.OnCreate(bundle);
+			base.OnCreate(savedInstanceState);
 
-			Forms.Init(this, null);
-
-			// Set our view from the "main" layout resource
-			SetContentView (Resource.Layout.Main);
+			SetContentView (Resource.Layout.Second);
 			
 			var ft = SupportFragmentManager.BeginTransaction();
-			ft.Replace(Resource.Id.fragment_frame_layout, new MainFragment(), "main");
+			ft.Replace(Resource.Id.fragment_frame_layout, new SecondFragment(), "main");
+			ft.Commit();
+		}
+
+		void ShowEmbeddedPageFragment(Fragment fragment)
+		{
+			FragmentTransaction ft = SupportFragmentManager.BeginTransaction();
+
+			ft.AddToBackStack(null);
+			ft.Replace(Resource.Id.fragment_frame_layout, fragment, "hello");
+			
 			ft.Commit();
 		}
 
@@ -56,52 +67,30 @@ namespace Embedding.Droid
 			ShowEmbeddedPageFragment(_alertsAndActionSheets);
 		}
 
-		void ShowEmbeddedPageFragment(Fragment fragment)
-		{
-			FragmentTransaction ft = SupportFragmentManager.BeginTransaction();
-
-			ft.AddToBackStack(null);
-			ft.Replace(Resource.Id.fragment_frame_layout, fragment, "hello");
-			
-			ft.Commit();
-		}
-
-		public void LaunchSecondActivity()
-		{
-			StartActivity(typeof(SecondActivity));
-		}
 	}
 
-	public class MainFragment : Fragment
+	public class SecondFragment : Fragment
 	{
 		public override View OnCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
 		{
-			var view =  inflater.Inflate(Resource.Layout.MainFragment, container, false);
+			var view =  inflater.Inflate(Resource.Layout.SecondFragment, container, false);
 			var showEmbeddedButton = view.FindViewById<Button>(Resource.Id.showEmbeddedButton);
 			var showAlertsActionSheets = view.FindViewById<Button>(Resource.Id.showAlertsActionSheets);
-			var launchSecondActivity = view.FindViewById<Button>(Resource.Id.launchSecondActivity);
 
 			showEmbeddedButton.Click += ShowEmbeddedClick;
 			showAlertsActionSheets.Click += ShowAlertsActionSheetsClick;
-			launchSecondActivity.Click += LaunchSecondActivityOnClick;
 
 			return view;
 		}
 
-		void LaunchSecondActivityOnClick(object sender, EventArgs e)
-		{
-			((MainActivity)Activity).LaunchSecondActivity();
-		}
-
 		void ShowAlertsActionSheetsClick(object sender, EventArgs eventArgs)
 		{
-			((MainActivity)Activity).ShowAlertsAndActionSheets();
+			((SecondActivity)Activity).ShowAlertsAndActionSheets();
 		}
 
 		void ShowEmbeddedClick(object sender, EventArgs e)
 		{
-			((MainActivity)Activity).ShowHello();
+			((SecondActivity)Activity).ShowHello();
 		}
 	}
 }
-
