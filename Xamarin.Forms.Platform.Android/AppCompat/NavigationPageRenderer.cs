@@ -796,7 +796,7 @@ namespace Xamarin.Forms.Platform.Android.AppCompat
 					FileImageSource icon = item.Icon;
 					if (!string.IsNullOrEmpty(icon))
 					{
-						Drawable iconDrawable = context.Resources.GetFormsDrawable(icon);
+						Drawable iconDrawable = context.GetFormsDrawable(icon);
 						if (iconDrawable != null)
 							menuItem.SetIcon(iconDrawable);
 					}
