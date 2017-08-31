@@ -114,7 +114,6 @@ namespace Xamarin.Forms
 #pragma warning restore 618
 
 			ResourceManager.Init(resourceAssembly);
-
 			Color.SetAccent(GetAccentColor(activity));
 
 			if (!IsInitialized)
@@ -147,7 +146,7 @@ namespace Xamarin.Forms
 
 			if (ExpressionSearch.Default == null)
 				ExpressionSearch.Default = new AndroidExpressionSearch();
-
+			
 			// Can't register the ResourcesProvider via DependencyAttribute because we need a context for it; instead
 			// we'll register a specific instance of it here
 			DependencyService.Register<ISystemResourcesProvider, ResourcesProvider>(new ResourcesProvider(activity));
@@ -211,7 +210,7 @@ namespace Xamarin.Forms
 
 		class AndroidDeviceInfo : DeviceInfo
 		{
-			bool disposed;
+			bool _disposed;
 			readonly Context _formsActivity;
 			readonly Size _pixelScreenSize;
 			readonly double _scalingFactor;
@@ -220,18 +219,22 @@ namespace Xamarin.Forms
 
 			public AndroidDeviceInfo(Context formsActivity)
 			{
-				_formsActivity = formsActivity;
-				CheckOrientationChanged(_formsActivity.Resources.Configuration.Orientation);
-				// This will not be an implementation of IDeviceInfoProvider when running inside the context
-				// of layoutlib, which is what the Android Designer does.
-				if (_formsActivity is IDeviceInfoProvider)
-					((IDeviceInfoProvider) _formsActivity).ConfigurationChanged += ConfigurationChanged;
-
 				using (DisplayMetrics display = formsActivity.Resources.DisplayMetrics)
 				{
 					_scalingFactor = display.Density;
 					_pixelScreenSize = new Size(display.WidthPixels, display.HeightPixels);
 					ScaledScreenSize = new Size(_pixelScreenSize.Width / _scalingFactor, _pixelScreenSize.Width / _scalingFactor);
+				}
+
+				CheckOrientationChanged(_formsActivity.Resources.Configuration.Orientation);
+
+				// This will not be an implementation of IDeviceInfoProvider when running inside the context
+				// of layoutlib, which is what the Android Designer does.
+				// It also won't be IDeviceInfoProvider when using Page Embedding
+				if (formsActivity is IDeviceInfoProvider)
+				{
+					_formsActivity = formsActivity;
+					((IDeviceInfoProvider)_formsActivity).ConfigurationChanged += ConfigurationChanged;
 				}
 			}
 
@@ -249,11 +252,20 @@ namespace Xamarin.Forms
 
 			protected override void Dispose(bool disposing)
 			{
-				if (disposing && !disposed) {
-					disposed = true;
-					if (_formsActivity is IDeviceInfoProvider)
-						((IDeviceInfoProvider) _formsActivity).ConfigurationChanged -= ConfigurationChanged;
+				if (_disposed)
+				{
+					return;
 				}
+
+				_disposed = true;
+
+				if (disposing)
+				{
+					var provider = _formsActivity as IDeviceInfoProvider;
+					if (provider != null)
+						provider.ConfigurationChanged -= ConfigurationChanged;
+				}
+
 				base.Dispose(disposing);
 			}
 
@@ -441,6 +453,7 @@ namespace Xamarin.Forms
 
 			public string RuntimePlatform => Device.Android;
 
+			// TODO hartez 2017/08/31 12:33:07 Test this thing with multiple Activities	
 			public void OpenUriAction(Uri uri)
 			{
 				global::Android.Net.Uri aUri = global::Android.Net.Uri.Parse(uri.ToString());
