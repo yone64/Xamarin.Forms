@@ -17,8 +17,10 @@ namespace Xamarin.Forms.Controls.Issues
 		{
 			Content = new PinchToZoomContainer
 			{
+				AutomationId = "zoomContainer",
 				Content = new Image
 				{
+					AutomationId = "zoomImg",
 					Source = ImageSource.FromFile("oasis.jpg")
 				}
 			};
@@ -92,9 +94,13 @@ namespace Xamarin.Forms.Controls.Issues
 		[Test]
 		public void Bugzilla57515Test()
 		{
-			RunningApp.Screenshot ("I am at Issue 1");
-			RunningApp.WaitForElement (q => q.Marked ("IssuePageLabel"));
-			RunningApp.Screenshot ("I see the Label");
+			
+			var img = RunningApp.Query("zoomImg")[0];
+			var rect1 = img.Rect;
+			RunningApp.PinchToZoomIn(c => c.Marked("zoomContainer"));
+			var img2 = RunningApp.Query("zoomImg")[0];
+			var rect2 = img2.Rect;
+			Assert.LessOrEqual(rect2.X, rect1.X);
 		}
 #endif
 	}
