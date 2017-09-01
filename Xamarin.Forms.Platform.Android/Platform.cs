@@ -1067,6 +1067,7 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			bool _notReallyHandled;
 
+			[Obsolete("This constructor is obsolete as of version 3.0. Please use DefaultRenderer(Context) instead.")]
 			public DefaultRenderer()
 			{
 			}
@@ -1075,6 +1076,7 @@ namespace Xamarin.Forms.Platform.Android
 
 			public DefaultRenderer(Context context) : base(context)
 			{
+				ChildrenDrawingOrderEnabled = true;
 			}
 
 			internal void NotifyFakeHandling()
