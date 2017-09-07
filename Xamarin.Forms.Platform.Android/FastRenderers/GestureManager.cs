@@ -40,8 +40,7 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 					() =>
 						new GestureDetector(
 							_gestureListener =
-								new InnerGestureListener(_tapGestureHandler.OnTap, _tapGestureHandler.TapGestureRecognizers,
-									_panGestureHandler.OnPan, _panGestureHandler.OnPanStarted, _panGestureHandler.OnPanComplete)));
+								new InnerGestureListener(_tapGestureHandler, _panGestureHandler)));
 
 			_scaleDetector =
 				new Lazy<ScaleGestureDetector>(

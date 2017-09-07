@@ -43,8 +43,7 @@ namespace Xamarin.Forms.Platform.Android
 				new Lazy<GestureDetector>(
 					() =>
 					new GestureDetector(
-						_tapAndPanListener =
-						new InnerGestureListener(_tapGestureHandler.OnTap, _tapGestureHandler.TapGestureRecognizers, _panGestureHandler.OnPan, _panGestureHandler.OnPanStarted, _panGestureHandler.OnPanComplete)));
+						_tapAndPanListener = new InnerGestureListener(_tapGestureHandler, _panGestureHandler)));
 
 			//_scaleDetector = new Lazy<ScaleGestureDetector>(
 			//		() => new ScaleGestureDetector(Context, new InnerScaleListener(_pinchGestureHandler.OnPinch, _pinchGestureHandler.OnPinchStarted, _pinchGestureHandler.OnPinchEnded))
@@ -53,10 +52,10 @@ namespace Xamarin.Forms.Platform.Android
 
 		public override bool OnTouchEvent(MotionEvent e)
 		{
-			System.Diagnostics.Debug.WriteLine($">>>>> VisualElementRenderer OnTouchEvent {Element.AutomationId}");
+			System.Diagnostics.Debug.WriteLine($">>>>> VisualElementRenderer OnTouchEvent {Element.AutomationId} {e.Action}");
 			var eventConsumed = _tapAndPanDetector.Value.OnTouchEvent(e);
 
-			System.Diagnostics.Debug.WriteLine($">>>>> VisualElementRenderer OnTouchEvent 57: eventConsumed is {eventConsumed}");
+			System.Diagnostics.Debug.WriteLine($">>>>> VisualElementRenderer OnTouchEvent {Element.AutomationId} {e.Action} eventConsumed is {eventConsumed}");
 
 			if (eventConsumed)
 			{

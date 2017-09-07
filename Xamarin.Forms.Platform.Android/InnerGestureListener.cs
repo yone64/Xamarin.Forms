@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Android.Runtime;
 using Android.Views;
@@ -10,6 +9,8 @@ namespace Xamarin.Forms.Platform.Android
 {
 	internal class InnerGestureListener : Object, GestureDetector.IOnGestureListener, GestureDetector.IOnDoubleTapListener
 	{
+		readonly TapGestureHandler _tapGestureHandler;
+		readonly PanGestureHandler _panGestureHandler;
 		bool _isScrolling;		
 		float _lastX;
 		float _lastY;
@@ -21,28 +22,56 @@ namespace Xamarin.Forms.Platform.Android
 		Func<int, bool> _tapDelegate;
 		Func<int, IEnumerable<TapGestureRecognizer>> _tapGestureRecognizers;
 
-		public InnerGestureListener(Func<int, bool> tapDelegate, 
-			Func<int, IEnumerable<TapGestureRecognizer>> tapGestureRecognizers, 
-			Func<float, float, int, bool> scrollDelegate,
-			Func<int, bool> scrollStartedDelegate, Func<bool> scrollCompleteDelegate)
+		public InnerGestureListener(TapGestureHandler tapGestureHandler, PanGestureHandler panGestureHandler)
 		{
-			if (tapDelegate == null)
-				throw new ArgumentNullException(nameof(tapDelegate));
-			if (tapGestureRecognizers == null)
-				throw new ArgumentNullException(nameof(tapGestureRecognizers));
-			if (scrollDelegate == null)
-				throw new ArgumentNullException(nameof(scrollDelegate));
-			if (scrollStartedDelegate == null)
-				throw new ArgumentNullException(nameof(scrollStartedDelegate));
-			if (scrollCompleteDelegate == null)
-				throw new ArgumentNullException(nameof(scrollCompleteDelegate));
+			if (tapGestureHandler == null)
+			{
+				throw new ArgumentNullException(nameof(tapGestureHandler));
+			}
 
-			_tapDelegate = tapDelegate;
-			_tapGestureRecognizers = tapGestureRecognizers;
-			_scrollDelegate = scrollDelegate;
-			_scrollStartedDelegate = scrollStartedDelegate;
-			_scrollCompleteDelegate = scrollCompleteDelegate;
+			if (panGestureHandler == null)
+			{
+				throw new ArgumentNullException(nameof(panGestureHandler));
+			}
+
+			_tapGestureHandler = tapGestureHandler;
+			_panGestureHandler = panGestureHandler;
+
+			_tapDelegate = tapGestureHandler.OnTap;
+			_tapGestureRecognizers = tapGestureHandler.TapGestureRecognizers;
+			_scrollDelegate = panGestureHandler.OnPan;
+			_scrollStartedDelegate = panGestureHandler.OnPanStarted;
+			_scrollCompleteDelegate = panGestureHandler.OnPanComplete;
 		}
+
+		bool HasAnyGestures()
+		{
+			// TODO hartez 2017/09/07 16:46:50 Make sure to get rid of the old constructor; this method won't work with it	
+			return _panGestureHandler.HasAnyGestures() || _tapGestureHandler.HasAnyGestures();
+		}
+
+		//public InnerGestureListener(Func<int, bool> tapDelegate, 
+		//	Func<int, IEnumerable<TapGestureRecognizer>> tapGestureRecognizers, 
+		//	Func<float, float, int, bool> scrollDelegate,
+		//	Func<int, bool> scrollStartedDelegate, Func<bool> scrollCompleteDelegate)
+		//{
+		//	if (tapDelegate == null)
+		//		throw new ArgumentNullException(nameof(tapDelegate));
+		//	if (tapGestureRecognizers == null)
+		//		throw new ArgumentNullException(nameof(tapGestureRecognizers));
+		//	if (scrollDelegate == null)
+		//		throw new ArgumentNullException(nameof(scrollDelegate));
+		//	if (scrollStartedDelegate == null)
+		//		throw new ArgumentNullException(nameof(scrollStartedDelegate));
+		//	if (scrollCompleteDelegate == null)
+		//		throw new ArgumentNullException(nameof(scrollCompleteDelegate));
+
+		//	_tapDelegate = tapDelegate;
+		//	_tapGestureRecognizers = tapGestureRecognizers;
+		//	_scrollDelegate = scrollDelegate;
+		//	_scrollStartedDelegate = scrollStartedDelegate;
+		//	_scrollCompleteDelegate = scrollCompleteDelegate;
+		//}
 
 		// This is needed because GestureRecognizer callbacks can be delayed several hundred milliseconds
 		// which can result in the need to resurrect this object if it has already been disposed. We dispose
@@ -77,20 +106,18 @@ namespace Xamarin.Forms.Platform.Android
 
 		bool GestureDetector.IOnGestureListener.OnDown(MotionEvent e)
 		{
-			Debug.WriteLine($">>>>> InnerGestureListener OnDown 78: {e.Action}");
-
 			SetStartingPosition(e);
 
-			// TODO hartez This is suuuuuper inefficent; there's got to be a better way
-			// TODO hartez 2017/09/07 14:20:02 Turning this off for now, don't think we really need it	
-			//if (_tapGestureRecognizers(1).Any() || _tapGestureRecognizers(2).Any())
-			//{
-			//	// Need to return true for OnDown or the GestureDetector will ignore pretty much everything else
-			//	return true;
-			//}
+			if (HasAnyGestures())
+			{
+				// If we have any gestures to listen for, we need to return true to show we're interested in the rest
+				// of the events.		
+				return true;
+			}
 
-			//return false;
-			return true;
+			// Since we don't have any gestures we're listening for, we return false to show we're not interested
+			// and let parent controls have a whack at the events
+			return false;
 		}
 
 		bool GestureDetector.IOnGestureListener.OnFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)
@@ -120,7 +147,6 @@ namespace Xamarin.Forms.Platform.Android
 
 		bool GestureDetector.IOnGestureListener.OnSingleTapUp(MotionEvent e)
 		{
-			Debug.WriteLine($">>>>> InnerGestureListener OnSingleTapUp 123: MESSAGE");
 			if (_disposed)
 				return false;
 
@@ -138,7 +164,6 @@ namespace Xamarin.Forms.Platform.Android
 
 		bool GestureDetector.IOnDoubleTapListener.OnSingleTapConfirmed(MotionEvent e)
 		{
-			Debug.WriteLine($">>>>> InnerGestureListener OnSingleTapConfirmed 141: MESSAGE");
 			if (_disposed)
 				return false;
 
