@@ -1054,7 +1054,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		internal class DefaultRenderer : VisualElementRenderer<View>
 		{
-			bool _notReallyHandled;
+			//bool _notReallyHandled;
 			Dictionary<int, float> _minimumElevation = new Dictionary<int, float>();
 
 			public DefaultRenderer()
@@ -1062,98 +1062,98 @@ namespace Xamarin.Forms.Platform.Android
 				ChildrenDrawingOrderEnabled = true;
 			}
 
-			readonly MotionEventHelper _motionEventHelper = new MotionEventHelper();
+			//readonly MotionEventHelper _motionEventHelper = new MotionEventHelper();
 
-			internal void NotifyFakeHandling()
-			{
-				_notReallyHandled = true;
-			}
+			//internal void NotifyFakeHandling()
+			//{
+			//	_notReallyHandled = true;
+			//}
 
 			internal void InvalidateMinimumElevation()
 			{
 				_minimumElevation = new Dictionary<int, float>();
 			}
 
-			public override bool OnTouchEvent(MotionEvent e)
-			{
-				if (base.OnTouchEvent(e))
-					return true;
+			//public override bool OnTouchEvent(MotionEvent e)
+			//{
+			//	if (base.OnTouchEvent(e))
+			//		return true;
 
-				return _motionEventHelper.HandleMotionEvent(Parent, e);
-			}
+			//	return _motionEventHelper.HandleMotionEvent(Parent, e);
+			//}
 
 			protected override void OnElementChanged(ElementChangedEventArgs<View> e)
 			{
 				base.OnElementChanged(e);
 
-				_motionEventHelper.UpdateElement(e.NewElement);
+				//_motionEventHelper.UpdateElement(e.NewElement);
 			}
 
-			public override bool DispatchTouchEvent(MotionEvent e)
-			{
-				#region Excessive explanation
-				// Normally dispatchTouchEvent feeds the touch events to its children one at a time, top child first,
-				// (and only to the children in the hit-test area of the event) stopping as soon as one of them has handled
-				// the event. 
+			//public override bool DispatchTouchEvent(MotionEvent e)
+			//{
+			//	#region Excessive explanation
+			//	// Normally dispatchTouchEvent feeds the touch events to its children one at a time, top child first,
+			//	// (and only to the children in the hit-test area of the event) stopping as soon as one of them has handled
+			//	// the event. 
 
-				// But to be consistent across the platforms, we don't want this behavior; if an element is not input transparent
-				// we don't want an event to "pass through it" and be handled by an element "behind/under" it. We just want the processing
-				// to end after the first non-transparent child, regardless of whether the event has been handled.
+			//	// But to be consistent across the platforms, we don't want this behavior; if an element is not input transparent
+			//	// we don't want an event to "pass through it" and be handled by an element "behind/under" it. We just want the processing
+			//	// to end after the first non-transparent child, regardless of whether the event has been handled.
 
-				// This is only an issue for a couple of controls; the interactive controls (switch, button, slider, etc) already "handle" their touches 
-				// and the events don't propagate to other child controls. But for image, label, and box that doesn't happen. We can't have those controls 
-				// lie about their events being handled because then the events won't propagate to *parent* controls (e.g., a frame with a label in it would
-				// never get a tap gesture from the label). In other words, we *want* parent propagation, but *do not want* sibling propagation. So we need to short-circuit 
-				// base.DispatchTouchEvent here, but still return "false".
+			//	// This is only an issue for a couple of controls; the interactive controls (switch, button, slider, etc) already "handle" their touches 
+			//	// and the events don't propagate to other child controls. But for image, label, and box that doesn't happen. We can't have those controls 
+			//	// lie about their events being handled because then the events won't propagate to *parent* controls (e.g., a frame with a label in it would
+			//	// never get a tap gesture from the label). In other words, we *want* parent propagation, but *do not want* sibling propagation. So we need to short-circuit 
+			//	// base.DispatchTouchEvent here, but still return "false".
 
-				// Duplicating the logic of ViewGroup.dispatchTouchEvent and modifying it slightly for our purposes is a non-starter; the method is too
-				// complex and does a lot of micro-optimization. Instead, we provide a signalling mechanism for the controls which don't already "handle" touch
-				// events to tell us that they will be lying about handling their event; they then return "true" to short-circuit base.DispatchTouchEvent.
+			//	// Duplicating the logic of ViewGroup.dispatchTouchEvent and modifying it slightly for our purposes is a non-starter; the method is too
+			//	// complex and does a lot of micro-optimization. Instead, we provide a signalling mechanism for the controls which don't already "handle" touch
+			//	// events to tell us that they will be lying about handling their event; they then return "true" to short-circuit base.DispatchTouchEvent.
 
-				// The container gets this message and after it gets the "handled" result from dispatchTouchEvent, 
-				// it then knows to ignore that result and return false/unhandled. This allows the event to propagate up the tree.
-				#endregion
+			//	// The container gets this message and after it gets the "handled" result from dispatchTouchEvent, 
+			//	// it then knows to ignore that result and return false/unhandled. This allows the event to propagate up the tree.
+			//	#endregion
 
-				_notReallyHandled = false;
+			//	_notReallyHandled = false;
 
-				var result = base.DispatchTouchEvent(e);
+			//	var result = base.DispatchTouchEvent(e);
 
-				if (result && _notReallyHandled)
-				{
-					// If the child control returned true from its touch event handler but signalled that it was a fake "true", then we
-					// don't consider the event truly "handled" yet. 
-					// Since a child control short-circuited the normal dispatchTouchEvent stuff, this layout never got the chance for
-					// IOnTouchListener.OnTouch and the OnTouchEvent override to try handling the touches; we'll do that now
-					return OnTouchEvent(e);
-				}
+			//	if (result && _notReallyHandled)
+			//	{
+			//		// If the child control returned true from its touch event handler but signalled that it was a fake "true", then we
+			//		// don't consider the event truly "handled" yet. 
+			//		// Since a child control short-circuited the normal dispatchTouchEvent stuff, this layout never got the chance for
+			//		// IOnTouchListener.OnTouch and the OnTouchEvent override to try handling the touches; we'll do that now
+			//		return OnTouchEvent(e);
+			//	}
 
-				return result;
-			}
+			//	return result;
+			//}
 
-			protected override int GetChildDrawingOrder(int childCount, int i)
-			{
-				//On Material design the button states use Elevation property, we need to make sure
-				//we update the elevation of other controls to be over the previous one
+			//protected override int GetChildDrawingOrder(int childCount, int i)
+			//{
+			//	//On Material design the button states use Elevation property, we need to make sure
+			//	//we update the elevation of other controls to be over the previous one
 				if (Forms.IsLollipopOrNewer)
 				{
-					if (!_minimumElevation.ContainsKey(i))
+			//	if (!_minimumElevation.ContainsKey(i))
 					{
-						_minimumElevation[i] = GetChildAt(i).Elevation;
+			//		_minimumElevation[i] = GetChildAt(i).Elevation;
 					}
 						
-					for (int j = 0; j < _minimumElevation.Count() - 1; j++)
-					{
-						while (_minimumElevation[j] > _minimumElevation[j + 1])
-						{
-							_minimumElevation[j + 1] = _minimumElevation[j] + 1;
-							GetChildAt(j + 1).Elevation = _minimumElevation[j + 1];
-						}
-						if (j == i)
-							break;
+			//	for (int j = 0; j < _minimumElevation.Count() - 1; j++)
+			//	{
+			//		while (_minimumElevation[j] > _minimumElevation[j + 1])
+			//		{
+			//			_minimumElevation[j + 1] = _minimumElevation[j] + 1;
+			//			GetChildAt(j + 1).Elevation = _minimumElevation[j + 1];
+			//		}
+			//		if (j == i)
+			//			break;
 					}
-				}
-				return base.GetChildDrawingOrder(childCount, i);
-			}
+			//	}
+			//	return base.GetChildDrawingOrder(childCount, i);
+			//}
 		}
 
 		#region IPlatformEngine implementation

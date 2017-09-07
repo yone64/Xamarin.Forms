@@ -21,7 +21,7 @@ namespace Xamarin.Forms.Platform.Android
 			}
 
 			// Let the container know that we're "fake" handling this event
-			renderer.NotifyFakeHandling();
+			//renderer.NotifyFakeHandling();
 
 			return true;
 		}

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Android.Runtime;
 using Android.Views;
@@ -76,16 +77,20 @@ namespace Xamarin.Forms.Platform.Android
 
 		bool GestureDetector.IOnGestureListener.OnDown(MotionEvent e)
 		{
+			Debug.WriteLine($">>>>> InnerGestureListener OnDown 78: {e.Action}");
+
 			SetStartingPosition(e);
 
 			// TODO hartez This is suuuuuper inefficent; there's got to be a better way
-			if (_tapGestureRecognizers(1).Any() || _tapGestureRecognizers(2).Any())
-			{
-				// Need to return true for OnDown or the GestureDetector will ignore pretty much everything else
-				return true;
-			}
+			// TODO hartez 2017/09/07 14:20:02 Turning this off for now, don't think we really need it	
+			//if (_tapGestureRecognizers(1).Any() || _tapGestureRecognizers(2).Any())
+			//{
+			//	// Need to return true for OnDown or the GestureDetector will ignore pretty much everything else
+			//	return true;
+			//}
 
-			return false;
+			//return false;
+			return true;
 		}
 
 		bool GestureDetector.IOnGestureListener.OnFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)
@@ -115,6 +120,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		bool GestureDetector.IOnGestureListener.OnSingleTapUp(MotionEvent e)
 		{
+			Debug.WriteLine($">>>>> InnerGestureListener OnSingleTapUp 123: MESSAGE");
 			if (_disposed)
 				return false;
 
@@ -132,6 +138,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		bool GestureDetector.IOnDoubleTapListener.OnSingleTapConfirmed(MotionEvent e)
 		{
+			Debug.WriteLine($">>>>> InnerGestureListener OnSingleTapConfirmed 141: MESSAGE");
 			if (_disposed)
 				return false;
 

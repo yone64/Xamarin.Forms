@@ -10,42 +10,60 @@ using AView = Android.Views.View;
 namespace Xamarin.Forms.Platform.Android
 {
 	public abstract class VisualElementRenderer<TElement> : FormsViewGroup, IVisualElementRenderer, 
-		AView.IOnTouchListener, IEffectControlProvider where TElement : VisualElement
+		//AView.IOnTouchListener, 
+		IEffectControlProvider where TElement : VisualElement
 	{
 		readonly List<EventHandler<VisualElementChangedEventArgs>> _elementChangedHandlers = new List<EventHandler<VisualElementChangedEventArgs>>();
 
-		readonly Lazy<GestureDetector> _gestureDetector;
-		readonly PanGestureHandler _panGestureHandler;
-		readonly PinchGestureHandler _pinchGestureHandler;
+		readonly Lazy<GestureDetector> _tapAndPanDetector;
+		InnerGestureListener _tapAndPanListener;
 		readonly TapGestureHandler _tapGestureHandler;
+		readonly PanGestureHandler _panGestureHandler;
+		
 
+		//readonly PinchGestureHandler _pinchGestureHandler;
 		VisualElementRendererFlags _flags = VisualElementRendererFlags.AutoPackage | VisualElementRendererFlags.AutoTrack;
 
 		string _defaultContentDescription;
 		bool? _defaultFocusable;
 		string _defaultHint;
 		int? _defaultLabelFor;
-		InnerGestureListener _gestureListener;
+		
 		VisualElementPackager _packager;
 		PropertyChangedEventHandler _propertyChangeHandler;
-		Lazy<ScaleGestureDetector> _scaleDetector;
+		//Lazy<ScaleGestureDetector> _scaleDetector;
 
 		protected VisualElementRenderer() : base(Forms.Context)
 		{
 			_tapGestureHandler = new TapGestureHandler(() => View);
 			_panGestureHandler = new PanGestureHandler(() => View, Context.FromPixels);
-			_pinchGestureHandler = new PinchGestureHandler(() => View);
+			//_pinchGestureHandler = new PinchGestureHandler(() => View);
 
-			_gestureDetector =
+			_tapAndPanDetector =
 				new Lazy<GestureDetector>(
 					() =>
 					new GestureDetector(
-						_gestureListener =
+						_tapAndPanListener =
 						new InnerGestureListener(_tapGestureHandler.OnTap, _tapGestureHandler.TapGestureRecognizers, _panGestureHandler.OnPan, _panGestureHandler.OnPanStarted, _panGestureHandler.OnPanComplete)));
 
-			_scaleDetector = new Lazy<ScaleGestureDetector>(
-					() => new ScaleGestureDetector(Context, new InnerScaleListener(_pinchGestureHandler.OnPinch, _pinchGestureHandler.OnPinchStarted, _pinchGestureHandler.OnPinchEnded))
-					);
+			//_scaleDetector = new Lazy<ScaleGestureDetector>(
+			//		() => new ScaleGestureDetector(Context, new InnerScaleListener(_pinchGestureHandler.OnPinch, _pinchGestureHandler.OnPinchStarted, _pinchGestureHandler.OnPinchEnded))
+			//		);
+		}
+
+		public override bool OnTouchEvent(MotionEvent e)
+		{
+			System.Diagnostics.Debug.WriteLine($">>>>> VisualElementRenderer OnTouchEvent {Element.AutomationId}");
+			var eventConsumed = _tapAndPanDetector.Value.OnTouchEvent(e);
+
+			System.Diagnostics.Debug.WriteLine($">>>>> VisualElementRenderer OnTouchEvent 57: eventConsumed is {eventConsumed}");
+
+			if (eventConsumed)
+			{
+				return true;
+			}
+
+			return base.OnTouchEvent(e);
 		}
 
 		public TElement Element { get; private set; }
@@ -83,46 +101,46 @@ namespace Xamarin.Forms.Platform.Android
 				OnRegisterEffect(platformEffect);
 		}
 
-		public override bool OnInterceptTouchEvent(MotionEvent ev)
-		{
-			if (!Element.IsEnabled || (Element.InputTransparent && Element.IsEnabled))
-			{
-				return true;
-			}
+		//public override bool OnInterceptTouchEvent(MotionEvent ev)
+		//{
+		//	if (!Element.IsEnabled || (Element.InputTransparent && Element.IsEnabled))
+		//	{
+		//		return true;
+		//	}
 
-			return base.OnInterceptTouchEvent(ev);
-		}
+		//	return base.OnInterceptTouchEvent(ev);
+		//}
 
-		bool AView.IOnTouchListener.OnTouch(AView v, MotionEvent e)
-		{
-			if (!Element.IsEnabled)
-				return true;
+		//bool AView.IOnTouchListener.OnTouch(AView v, MotionEvent e)
+		//{
+		//	if (!Element.IsEnabled)
+		//		return true;
 
-			if (Element.InputTransparent)
-				return false;
+		//	if (Element.InputTransparent)
+		//		return false;
 
-			var handled = false;
-			if (_pinchGestureHandler.IsPinchSupported)
-			{
-				if (!_scaleDetector.IsValueCreated)
-					ScaleGestureDetectorCompat.SetQuickScaleEnabled(_scaleDetector.Value, true);
-				handled = _scaleDetector.Value.OnTouchEvent(e);
-			}
+		//	var handled = false;
+		//	if (_pinchGestureHandler.IsPinchSupported)
+		//	{
+		//		if (!_scaleDetector.IsValueCreated)
+		//			ScaleGestureDetectorCompat.SetQuickScaleEnabled(_scaleDetector.Value, true);
+		//		handled = _scaleDetector.Value.OnTouchEvent(e);
+		//	}
 
-			_gestureListener?.OnTouchEvent(e);
+		//	_gestureListener?.OnTouchEvent(e);
 
-			if (_gestureDetector.IsValueCreated && _gestureDetector.Value.Handle == IntPtr.Zero)
-			{
-				// This gesture detector has already been disposed, probably because it's on a cell which is going away
-				return handled;
-			}
+		//	if (_gestureDetector.IsValueCreated && _gestureDetector.Value.Handle == IntPtr.Zero)
+		//	{
+		//		// This gesture detector has already been disposed, probably because it's on a cell which is going away
+		//		return handled;
+		//	}
 
-			// It's very important that the gesture detection happen first here
-			// if we check handled first, we might short-circuit and never check for tap/pan
-			handled = _gestureDetector.Value.OnTouchEvent(e) || handled;
+		//	// It's very important that the gesture detection happen first here
+		//	// if we check handled first, we might short-circuit and never check for tap/pan
+		//	handled = _gestureDetector.Value.OnTouchEvent(e) || handled;
 
-			return handled;
-		}
+		//	return handled;
+		//}
 
 		VisualElement IVisualElementRenderer.Element => Element;
 
@@ -191,7 +209,7 @@ namespace Xamarin.Forms.Platform.Android
 
 			if (oldElement == null)
 			{
-				SetOnTouchListener(this);
+				//SetOnTouchListener(this);
 				SoundEffectsEnabled = false;
 			}
 
@@ -247,17 +265,17 @@ namespace Xamarin.Forms.Platform.Android
 					_packager = null;
 				}
 
-				if (_scaleDetector != null && _scaleDetector.IsValueCreated)
-				{
-					_scaleDetector.Value.Dispose();
-					_scaleDetector = null;
-				}
+				//if (_scaleDetector != null && _scaleDetector.IsValueCreated)
+				//{
+				//	_scaleDetector.Value.Dispose();
+				//	_scaleDetector = null;
+				//}
 
-				if (_gestureListener != null)
-				{
-					_gestureListener.Dispose();
-					_gestureListener = null;
-				}
+				//if (_gestureListener != null)
+				//{
+				//	_gestureListener.Dispose();
+				//	_gestureListener = null;
+				//}
 
 				if (ManageNativeControlLifetime)
 				{

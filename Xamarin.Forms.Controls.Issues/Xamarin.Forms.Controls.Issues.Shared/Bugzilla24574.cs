@@ -14,15 +14,17 @@ namespace Xamarin.Forms.Controls.Issues
 	[Category(UITestCategories.Gestures)]
 #endif
 
+	// TODO hartez 2:26:25 PM Clean this up (issue number)
 	[Preserve (AllMembers = true)]
-	[Issue (IssueTracker.Bugzilla, 24574, "Tap Double Tap")]
+	[Issue (IssueTracker.Bugzilla, 924574, "Tap Double Tap")]
 	public class Issue24574 : TestContentPage 
 	{
 		protected override void Init ()
 		{
 			var label = new Label {
 				AutomationId = "TapLabel",
-				Text = "123" 
+				Text = "123",
+				FontSize = 50
 			};
 
 			var rec = new TapGestureRecognizer () { NumberOfTapsRequired = 1 };
