@@ -10,6 +10,12 @@ using NUnit.Framework;
 
 namespace Xamarin.Forms.Controls.Issues
 {
+#if UITEST
+	[Category(UITestCategories.Gestures)]
+	[Category(UITestCategories.ListView)]
+	[Category(UITestCategories.Cells)]
+#endif
+
 	[Preserve(AllMembers = true)]
 	[Issue(IssueTracker.Bugzilla, 46363, "TapGestureRecognizer blocks List View Context Actions", PlatformAffected.Android)]
 	public class Bugzilla46363 : TestContentPage

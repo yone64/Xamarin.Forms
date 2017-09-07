@@ -4,12 +4,19 @@ using System.Collections.Generic;
 using System.Diagnostics;
 
 #if UITEST
+using Xamarin.Forms.Core.UITests;
 using Xamarin.UITest;
 using NUnit.Framework;
 #endif
 
 namespace Xamarin.Forms.Controls.Issues
 {
+#if UITEST
+	[Category(UITestCategories.Gestures)]
+	[Category(UITestCategories.ListView)]
+	[Category(UITestCategories.Cells)]
+#endif
+
 	[Preserve(AllMembers = true)]
 	[Issue(IssueTracker.Bugzilla, 58833, "ListView SelectedItem Binding does not fire", PlatformAffected.Android)]
 	public class Bugzilla58833 : TestContentPage

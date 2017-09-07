@@ -3,15 +3,20 @@
 using Xamarin.Forms.CustomAttributes;
 using Xamarin.Forms.Internals;
 #if UITEST
+using Xamarin.Forms.Core.UITests;
 using Xamarin.UITest;
 using NUnit.Framework;
 #endif
 
 namespace Xamarin.Forms.Controls.Issues
 {
+#if UITEST
+	[Category(UITestCategories.Gestures)]
+#endif
+
 	[Preserve (AllMembers = true)]
 	[Issue (IssueTracker.Bugzilla, 24574, "Tap Double Tap")]
-	public class Issue24574 : TestContentPage // or TestMasterDetailPage, etc ...
+	public class Issue24574 : TestContentPage 
 	{
 		protected override void Init ()
 		{

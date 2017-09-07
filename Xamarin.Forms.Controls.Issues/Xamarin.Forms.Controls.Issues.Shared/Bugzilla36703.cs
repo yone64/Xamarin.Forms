@@ -4,10 +4,16 @@ using Xamarin.Forms.Internals;
 #if UITEST
 using Xamarin.UITest;
 using NUnit.Framework;
+using Xamarin.Forms.Core.UITests;
 #endif
 
 namespace Xamarin.Forms.Controls.Issues
 {
+#if UITEST
+	[Category(UITestCategories.Gestures)]
+	[Category(UITestCategories.IsEnabled)]
+#endif
+
 	[Preserve(AllMembers = true)]
 	[Issue(IssueTracker.Bugzilla, 36703, "TapGestureRecognizer inside initially disable Image will never fire Tapped event", PlatformAffected.All)]
 	public class Bugzilla36703 : TestContentPage

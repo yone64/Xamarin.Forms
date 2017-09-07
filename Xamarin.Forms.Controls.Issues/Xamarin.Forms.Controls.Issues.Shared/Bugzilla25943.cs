@@ -11,6 +11,7 @@ namespace Xamarin.Forms.Controls.Issues
 {
 #if UITEST
     [Category(UITestCategories.InputTransparent)]
+    [Category(UITestCategories.Gestures)]
 #endif
     [Preserve(AllMembers = true)]
     [Issue(IssueTracker.Bugzilla, 925943, "[Android] TapGestureRecognizer does not work with a nested StackLayout", PlatformAffected.Android)]
