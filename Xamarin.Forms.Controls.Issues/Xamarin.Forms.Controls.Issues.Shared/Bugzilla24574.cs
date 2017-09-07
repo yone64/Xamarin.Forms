@@ -40,7 +40,7 @@ namespace Xamarin.Forms.Controls.Issues
 
 #if UITEST
 		[Test]
-		public void Issue1Test ()
+		public void TapThenDoubleTap ()
 		{
 			RunningApp.Screenshot ("I am at Issue 24574");
 
