@@ -50,6 +50,7 @@ namespace Xamarin.Forms.Platform.Android
 			return _panGestureHandler.HasAnyGestures() || _tapGestureHandler.HasAnyGestures();
 		}
 
+		// TODO hartez 5:13:27 PM Clean this up
 		//public InnerGestureListener(Func<int, bool> tapDelegate, 
 		//	Func<int, IEnumerable<TapGestureRecognizer>> tapGestureRecognizers, 
 		//	Func<float, float, int, bool> scrollDelegate,

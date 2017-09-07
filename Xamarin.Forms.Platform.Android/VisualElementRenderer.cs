@@ -65,6 +65,20 @@ namespace Xamarin.Forms.Platform.Android
 			return base.OnTouchEvent(e);
 		}
 
+		public override bool OnInterceptTouchEvent(MotionEvent ev)
+		{
+			if (!Element.IsEnabled)
+			{
+				// TODO hartez 2017/09/07 17:21:17 If this works, we should seriously consider caching a local bool for this instead of GetValue on every motion event	
+
+				// If IsEnabled is false, prevent all the events from being dispatched to child Views
+				// and prevent them from being processed by this View as well
+				return true;
+			}
+
+			return base.OnInterceptTouchEvent(ev);
+		}
+
 		public TElement Element { get; private set; }
 
 		protected bool AutoPackage

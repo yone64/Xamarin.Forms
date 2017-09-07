@@ -43,7 +43,8 @@ namespace Xamarin.Forms.Platform.Android
 
 		public bool HasAnyGestures()
 		{
-			return GetView().GestureRecognizers.OfType<TapGestureRecognizer>().Any();
+			var view = GetView();
+			return view != null && view.GestureRecognizers.OfType<PanGestureRecognizer>().Any();
 		}
 
 		public IEnumerable<TapGestureRecognizer> TapGestureRecognizers(int count)
