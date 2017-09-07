@@ -99,13 +99,15 @@ namespace Xamarin.Forms.Controls.Issues
 		[Test]
 		public void Bugzilla57515Test()
 		{
-			
 			var img = RunningApp.Query("zoomImg")[0];
 			var rect1 = img.Rect;
 			RunningApp.PinchToZoomIn(c => c.Marked("zoomContainer"));
 			var img2 = RunningApp.Query("zoomImg")[0];
 			var rect2 = img2.Rect;
-			Assert.LessOrEqual(rect2.X, rect1.X);
+
+			// TODO hartez 2017/09/07 12:24:05 Once we get this working, need to find a better way to test it;	
+			// Not sure if the image rect will actually change; also, IApp.PinchToZoomIn doesn't appear to work
+			Assert.Less(rect1.X, rect2.X);
 		}
 #endif
 	}
