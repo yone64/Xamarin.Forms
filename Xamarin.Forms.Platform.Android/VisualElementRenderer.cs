@@ -52,10 +52,10 @@ namespace Xamarin.Forms.Platform.Android
 
 		public override bool OnTouchEvent(MotionEvent e)
 		{
-			System.Diagnostics.Debug.WriteLine($">>>>> VisualElementRenderer OnTouchEvent {Element.AutomationId} {e.Action}");
+			System.Diagnostics.Debug.WriteLine($">>>>> VisualElementRenderer OnTouchEvent {Element} {Element.AutomationId} {e.Action}");
 			var eventConsumed = _tapAndPanDetector.Value.OnTouchEvent(e);
 
-			System.Diagnostics.Debug.WriteLine($">>>>> VisualElementRenderer OnTouchEvent {Element.AutomationId} {e.Action} eventConsumed is {eventConsumed}");
+			//System.Diagnostics.Debug.WriteLine($">>>>> VisualElementRenderer OnTouchEvent {Element} {Element.AutomationId} {e.Action} eventConsumed is {eventConsumed}");
 
 			if (eventConsumed)
 			{
@@ -67,16 +67,34 @@ namespace Xamarin.Forms.Platform.Android
 
 		public override bool OnInterceptTouchEvent(MotionEvent ev)
 		{
+			//System.Diagnostics.Debug.WriteLine($">>>>> VisualElementRenderer OnInterceptTouchEvent {Element} {Element.AutomationId} {ev.Action}");
 			if (!Element.IsEnabled)
 			{
 				// TODO hartez 2017/09/07 17:21:17 If this works, we should seriously consider caching a local bool for this instead of GetValue on every motion event	
 
 				// If IsEnabled is false, prevent all the events from being dispatched to child Views
 				// and prevent them from being processed by this View as well
-				return true;
+				return true; // IOW, intercepted
 			}
 
 			return base.OnInterceptTouchEvent(ev);
+		}
+
+		public override bool DispatchTouchEvent(MotionEvent e)
+		{
+			System.Diagnostics.Debug.WriteLine($">>>>> VisualElementRenderer OnInterceptTouchEvent {Element} {Element.AutomationId} {e.Action}");
+			if (Element.InputTransparent)
+			{
+				// TODO hartez 2017/09/07 17:21:17 If this works, we should seriously consider caching a local bool for this instead of GetValue on every motion event	
+				// TODO hartez 2017/09/07 17:40:15 We'll have to handle this differntly on fast renderers, since they are ViewGroups and don't have this method	
+
+				// If the Element is InputTransparent, we should just return false on all touch events without
+				// even bothering to send them to the child Views
+
+				return false; // IOW, not handled
+			}
+
+			return base.DispatchTouchEvent(e);
 		}
 
 		public TElement Element { get; private set; }

@@ -5,7 +5,7 @@ namespace Xamarin.Forms.Platform.Android
 {
 	public class BoxRenderer : VisualElementRenderer<BoxView>
 	{
-		readonly MotionEventHelper _motionEventHelper = new MotionEventHelper();
+		//readonly MotionEventHelper _motionEventHelper = new MotionEventHelper();
 
 		public BoxRenderer()
 		{
@@ -24,7 +24,7 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			base.OnElementChanged(e);
 
-			_motionEventHelper.UpdateElement(e.NewElement);
+			//_motionEventHelper.UpdateElement(e.NewElement);
 
 			UpdateBackgroundColor();
 		}
