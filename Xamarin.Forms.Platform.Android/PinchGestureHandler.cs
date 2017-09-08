@@ -13,6 +13,7 @@ namespace Xamarin.Forms.Platform.Android
 			GetView = getView;
 		}
 
+		// TODO hartez 2017/09/08 13:54:55 Really just "has gestures"	
 		public bool IsPinchSupported
 		{
 			get

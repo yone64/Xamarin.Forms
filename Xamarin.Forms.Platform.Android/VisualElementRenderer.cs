@@ -10,7 +10,6 @@ using AView = Android.Views.View;
 namespace Xamarin.Forms.Platform.Android
 {
 	public abstract class VisualElementRenderer<TElement> : FormsViewGroup, IVisualElementRenderer, 
-		//AView.IOnTouchListener, 
 		IEffectControlProvider where TElement : VisualElement
 	{
 		readonly List<EventHandler<VisualElementChangedEventArgs>> _elementChangedHandlers = new List<EventHandler<VisualElementChangedEventArgs>>();
@@ -19,9 +18,10 @@ namespace Xamarin.Forms.Platform.Android
 		InnerGestureListener _tapAndPanListener;
 		readonly TapGestureHandler _tapGestureHandler;
 		readonly PanGestureHandler _panGestureHandler;
-		
 
-		//readonly PinchGestureHandler _pinchGestureHandler;
+		readonly PinchGestureHandler _pinchGestureHandler;
+		Lazy<ScaleGestureDetector> _scaleDetector;
+
 		VisualElementRendererFlags _flags = VisualElementRendererFlags.AutoPackage | VisualElementRendererFlags.AutoTrack;
 
 		string _defaultContentDescription;
@@ -31,13 +31,12 @@ namespace Xamarin.Forms.Platform.Android
 		
 		VisualElementPackager _packager;
 		PropertyChangedEventHandler _propertyChangeHandler;
-		//Lazy<ScaleGestureDetector> _scaleDetector;
-
+		
 		protected VisualElementRenderer() : base(Forms.Context)
 		{
 			_tapGestureHandler = new TapGestureHandler(() => View);
 			_panGestureHandler = new PanGestureHandler(() => View, Context.FromPixels);
-			//_pinchGestureHandler = new PinchGestureHandler(() => View);
+			_pinchGestureHandler = new PinchGestureHandler(() => View);
 
 			_tapAndPanDetector =
 				new Lazy<GestureDetector>(
@@ -45,24 +44,26 @@ namespace Xamarin.Forms.Platform.Android
 					new GestureDetector(
 						_tapAndPanListener = new InnerGestureListener(_tapGestureHandler, _panGestureHandler)));
 
-			//_scaleDetector = new Lazy<ScaleGestureDetector>(
-			//		() => new ScaleGestureDetector(Context, new InnerScaleListener(_pinchGestureHandler.OnPinch, _pinchGestureHandler.OnPinchStarted, _pinchGestureHandler.OnPinchEnded))
-			//		);
+			_scaleDetector = new Lazy<ScaleGestureDetector>(
+					() => new ScaleGestureDetector(Context, new InnerScaleListener(_pinchGestureHandler.OnPinch, _pinchGestureHandler.OnPinchStarted, _pinchGestureHandler.OnPinchEnded))
+					);
 		}
 
 		public override bool OnTouchEvent(MotionEvent e)
 		{
-			System.Diagnostics.Debug.WriteLine($">>>>> VisualElementRenderer OnTouchEvent {Element} {Element.AutomationId} {e.Action}");
-
-			if (!Element.IsEnabled)
+			if (!Enabled)
 			{
-				// TODO hartez 2017/09/07 17:21:17 If this works, we should seriously consider caching a local bool for this instead of GetValue on every motion event	
 				return false;
 			}
 
-			var eventConsumed = _tapAndPanDetector.Value.OnTouchEvent(e);
-
-			//System.Diagnostics.Debug.WriteLine($">>>>> VisualElementRenderer OnTouchEvent {Element} {Element.AutomationId} {e.Action} eventConsumed is {eventConsumed}");
+			bool eventConsumed = false;
+			if (_pinchGestureHandler.IsPinchSupported)
+			{
+				if (!_scaleDetector.IsValueCreated)
+					ScaleGestureDetectorCompat.SetQuickScaleEnabled(_scaleDetector.Value, true);
+				eventConsumed = _scaleDetector.Value.OnTouchEvent(e);
+			}
+			eventConsumed = _tapAndPanDetector.Value.OnTouchEvent(e) || eventConsumed;
 
 			if (eventConsumed)
 			{
@@ -74,14 +75,10 @@ namespace Xamarin.Forms.Platform.Android
 
 		public override bool OnInterceptTouchEvent(MotionEvent ev)
 		{
-			System.Diagnostics.Debug.WriteLine($">>>>> VisualElementRenderer OnInterceptTouchEvent {Element} {Element.AutomationId} {ev.Action}");
-			if (!Element.IsEnabled)
+			if (!Enabled)
 			{
-				// TODO hartez 2017/09/07 17:21:17 If this works, we should seriously consider caching a local bool for this instead of GetValue on every motion event	
-
-				// If IsEnabled is false, prevent all the events from being dispatched to child Views
+				// If Enabled is false, prevent all the events from being dispatched to child Views
 				// and prevent them from being processed by this View as well
-				System.Diagnostics.Debug.WriteLine($">>>>> VisualElementRenderer OnInterceptTouchEvent 77: {Element} {Element.AutomationId} is not enabled, returning true");
 				return true; // IOW, intercepted
 			}
 
@@ -90,13 +87,10 @@ namespace Xamarin.Forms.Platform.Android
 
 		public override bool DispatchTouchEvent(MotionEvent e)
 		{
-			//System.Diagnostics.Debug.WriteLine($">>>>> VisualElementRenderer OnInterceptTouchEvent {Element} {Element.AutomationId} {e.Action}");
-			if (Element.InputTransparent)
+			if (InputTransparent)
 			{
-				// TODO hartez 2017/09/07 17:21:17 If this works, we should seriously consider caching a local bool for this instead of GetValue on every motion event	
-				// TODO hartez 2017/09/07 17:40:15 We'll have to handle this differntly on fast renderers, since they are ViewGroups and don't have this method	
-
-				// If the Element is InputTransparent, we should just return false on all touch events without
+				// If the Element is InputTransparent, this ViewGroup will be marked InputTransparent
+				// If we're InputTransparent we should return false on all touch events without
 				// even bothering to send them to the child Views
 
 				return false; // IOW, not handled
@@ -139,47 +133,6 @@ namespace Xamarin.Forms.Platform.Android
 			if (platformEffect != null)
 				OnRegisterEffect(platformEffect);
 		}
-
-		//public override bool OnInterceptTouchEvent(MotionEvent ev)
-		//{
-		//	if (!Element.IsEnabled || (Element.InputTransparent && Element.IsEnabled))
-		//	{
-		//		return true;
-		//	}
-
-		//	return base.OnInterceptTouchEvent(ev);
-		//}
-
-		//bool AView.IOnTouchListener.OnTouch(AView v, MotionEvent e)
-		//{
-		//	if (!Element.IsEnabled)
-		//		return true;
-
-		//	if (Element.InputTransparent)
-		//		return false;
-
-		//	var handled = false;
-		//	if (_pinchGestureHandler.IsPinchSupported)
-		//	{
-		//		if (!_scaleDetector.IsValueCreated)
-		//			ScaleGestureDetectorCompat.SetQuickScaleEnabled(_scaleDetector.Value, true);
-		//		handled = _scaleDetector.Value.OnTouchEvent(e);
-		//	}
-
-		//	_gestureListener?.OnTouchEvent(e);
-
-		//	if (_gestureDetector.IsValueCreated && _gestureDetector.Value.Handle == IntPtr.Zero)
-		//	{
-		//		// This gesture detector has already been disposed, probably because it's on a cell which is going away
-		//		return handled;
-		//	}
-
-		//	// It's very important that the gesture detection happen first here
-		//	// if we check handled first, we might short-circuit and never check for tap/pan
-		//	handled = _gestureDetector.Value.OnTouchEvent(e) || handled;
-
-		//	return handled;
-		//}
 
 		VisualElement IVisualElementRenderer.Element => Element;
 
@@ -248,7 +201,6 @@ namespace Xamarin.Forms.Platform.Android
 
 			if (oldElement == null)
 			{
-				//SetOnTouchListener(this);
 				SoundEffectsEnabled = false;
 			}
 
@@ -304,6 +256,7 @@ namespace Xamarin.Forms.Platform.Android
 					_packager = null;
 				}
 
+				// TODO hartez 2:47:03 PM Clean this up or make it work? Not sure yet
 				//if (_scaleDetector != null && _scaleDetector.IsValueCreated)
 				//{
 				//	_scaleDetector.Value.Dispose();
@@ -368,6 +321,7 @@ namespace Xamarin.Forms.Platform.Android
 				SetFocusable();
 			else if (e.PropertyName == VisualElement.InputTransparentProperty.PropertyName)
 				UpdateInputTransparent();
+			
 
 			ElementPropertyChanged?.Invoke(this, e);
 		}
@@ -459,6 +413,8 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			InputTransparent = Element.InputTransparent;
 		}
+
+		
 
 		protected void SetPackager(VisualElementPackager packager)
 		{
