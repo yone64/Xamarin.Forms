@@ -195,12 +195,12 @@ namespace Xamarin.Forms.Platform.Android
 			_lastSizeRequest = null;
 		}
 
-		//public override bool OnTouchEvent(MotionEvent e)
-		//{
-		//	if (base.OnTouchEvent(e))
-		//		return true;
+		public override bool OnTouchEvent(MotionEvent e)
+		{
+			if (base.OnTouchEvent(e))
+				return true;
 
-		//	return _motionEventHelper.HandleMotionEvent(Parent, e);
-		//}
+			return _motionEventHelper.HandleMotionEvent(Parent, e);
+		}
 	}
 }

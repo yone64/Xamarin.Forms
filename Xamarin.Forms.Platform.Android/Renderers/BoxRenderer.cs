@@ -5,26 +5,26 @@ namespace Xamarin.Forms.Platform.Android
 {
 	public class BoxRenderer : VisualElementRenderer<BoxView>
 	{
-		//readonly MotionEventHelper _motionEventHelper = new MotionEventHelper();
+		readonly MotionEventHelper _motionEventHelper = new MotionEventHelper();
 
 		public BoxRenderer()
 		{
 			AutoPackage = false;
 		}
 
-		//public override bool OnTouchEvent(MotionEvent e)
-		//{
-		//	if (base.OnTouchEvent(e))
-		//		return true;
+		public override bool OnTouchEvent(MotionEvent e)
+		{
+			if (base.OnTouchEvent(e))
+				return true;
 
-		//	return _motionEventHelper.HandleMotionEvent(Parent, e);
-		//}
+			return _motionEventHelper.HandleMotionEvent(Parent, e);
+		}
 
 		protected override void OnElementChanged(ElementChangedEventArgs<BoxView> e)
 		{
 			base.OnElementChanged(e);
 
-			//_motionEventHelper.UpdateElement(e.NewElement);
+			_motionEventHelper.UpdateElement(e.NewElement);
 
 			UpdateBackgroundColor();
 		}
