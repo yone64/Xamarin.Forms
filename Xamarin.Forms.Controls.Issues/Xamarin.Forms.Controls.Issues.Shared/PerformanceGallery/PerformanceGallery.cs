@@ -81,7 +81,8 @@ namespace Xamarin.Forms.Controls.Issues
 		{
 			var scenarios = FindPerformanceScenarios()
 							.Select(o => (PerformanceScenario)Activator.CreateInstance(o))
-							.Where(scenario => scenario.View != null);
+							.Where(scenario => scenario.View != null)
+							.OrderBy(scenario => scenario.Name);
 
 			if (scenarios.GroupBy(c => c.Name).Any(c => c.Count() > 1))
 				throw new InvalidOperationException("Scenario names must be unique");

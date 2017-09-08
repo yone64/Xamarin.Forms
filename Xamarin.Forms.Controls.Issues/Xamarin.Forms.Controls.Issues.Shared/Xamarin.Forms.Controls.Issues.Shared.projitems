@@ -277,6 +277,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)PerformanceGallery\PerformanceScenario.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PerformanceGallery\PerformanceTracker.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PerformanceGallery\PerformanceTrackerTemplate.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PerformanceGallery\PerformanceTrackerWatcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PerformanceGallery\PerformanceViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PerformanceGallery\Scenarios\SearchBarScenarios.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PerformanceGallery\Scenarios\SliderScenarios.cs" />
