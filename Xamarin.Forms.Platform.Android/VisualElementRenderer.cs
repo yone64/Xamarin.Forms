@@ -63,6 +63,7 @@ namespace Xamarin.Forms.Platform.Android
 					ScaleGestureDetectorCompat.SetQuickScaleEnabled(_scaleDetector.Value, true);
 				eventConsumed = _scaleDetector.Value.OnTouchEvent(e);
 			}
+
 			eventConsumed = _tapAndPanDetector.Value.OnTouchEvent(e) || eventConsumed;
 
 			if (eventConsumed)
@@ -256,18 +257,18 @@ namespace Xamarin.Forms.Platform.Android
 					_packager = null;
 				}
 
-				// TODO hartez 2:47:03 PM Clean this up or make it work? Not sure yet
-				//if (_scaleDetector != null && _scaleDetector.IsValueCreated)
-				//{
-				//	_scaleDetector.Value.Dispose();
-				//	_scaleDetector = null;
-				//}
+				// TODO hartez 2:47:03 PM Clean these up or maybe we can get rid of them? Not sure yet
+				if (_scaleDetector != null && _scaleDetector.IsValueCreated)
+				{
+					_scaleDetector.Value.Dispose();
+					_scaleDetector = null;
+				}
 
-				//if (_gestureListener != null)
-				//{
-				//	_gestureListener.Dispose();
-				//	_gestureListener = null;
-				//}
+				if (_tapAndPanListener != null)
+				{
+					_tapAndPanListener.Dispose();
+					_tapAndPanListener = null;
+				}
 
 				if (ManageNativeControlLifetime)
 				{

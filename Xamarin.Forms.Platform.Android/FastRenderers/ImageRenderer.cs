@@ -16,6 +16,7 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 		int? _defaultLabelFor;
 		VisualElementTracker _visualElementTracker;
 		VisualElementRenderer _visualElementRenderer;
+		readonly MotionEventHelper _motionEventHelper = new MotionEventHelper();
 
 		protected override void Dispose(bool disposing)
 		{
@@ -70,13 +71,24 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 			ElementChanged?.Invoke(this, new VisualElementChangedEventArgs(e.OldElement, e.NewElement));
 		}
 
-		public override bool OnTouchEvent(MotionEvent e)
-        {
-            bool handled;
-            var result = _visualElementRenderer.OnTouchEvent(e, Parent, out handled);
+		// TODO hartez 4:19:39 PM Clean this up
+		//public override bool OnTouchEvent(MotionEvent e)
+  //      {
+  //          bool handled;
+  //          var result = _visualElementRenderer.OnTouchEvent(e, Parent, out handled);
 
-            return handled ? result : base.OnTouchEvent(e);
-        }
+  //          return handled ? result : base.OnTouchEvent(e);
+  //      }
+
+		public override bool OnTouchEvent(MotionEvent e)
+		{
+			if (_visualElementRenderer.OnTouchEvent(e, Parent))
+			{
+				return true;
+			}
+
+			return _motionEventHelper.HandleMotionEvent(Parent, e);
+		}
 
 		Size MinimumSize()
 		{
@@ -122,7 +134,7 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 			}
 
 			Internals.Performance.Stop();
-
+			_motionEventHelper.UpdateElement(element);
 			OnElementChanged(new ElementChangedEventArgs<Image>(oldElement, _element));
 
 			_element?.SendViewInitialized(Control);

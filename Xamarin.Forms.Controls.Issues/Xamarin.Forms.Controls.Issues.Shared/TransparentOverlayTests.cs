@@ -13,11 +13,15 @@ using NUnit.Framework;
 
 namespace Xamarin.Forms.Controls.Issues
 {
+
+	// TODO hartez 6:04:57 PM Clean this up - fix issue tracker and number
+
+
 #if UITEST
 	[Category(UITestCategories.InputTransparent)]
 #endif
 	[Preserve(AllMembers = true)]
-	[Issue(IssueTracker.None, 618, "Transparent Overlays", PlatformAffected.All)]
+	[Issue(IssueTracker.Bugzilla, 999618, "Transparent Overlays", PlatformAffected.All)]
 	public class TransparentOverlayTests : TestNavigationPage
 	{
 		readonly Color _transparentColor = Color.Transparent;

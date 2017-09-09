@@ -23,11 +23,15 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 		Color _lastUpdateColor = Color.Default;
 		VisualElementTracker _visualElementTracker;
 		VisualElementRenderer _visualElementRenderer;
-		
+		readonly MotionEventHelper _motionEventHelper = new MotionEventHelper();
+
 		bool _wasFormatted;
 
 		public LabelRenderer() : base(Forms.Context)
 		{
+			// TODO hartez 3:38:21 PM Clean this up
+			System.Diagnostics.Debug.WriteLine($">>>>> LabelRenderer LabelRenderer 32: FastRenderers Confirmed!");
+
 			_labelTextColorDefault = TextColors;
 			_visualElementRenderer = new VisualElementRenderer(this);
 		}
@@ -112,6 +116,7 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 				throw new ArgumentException("Element must be of type Label");
 
 			Element = label;
+			_motionEventHelper.UpdateElement(element);
 		}
 
 		void IVisualElementRenderer.SetLabelFor(int? id)
@@ -163,10 +168,12 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 
         public override bool OnTouchEvent(MotionEvent e)
         {
-            bool handled;
-            var result = _visualElementRenderer.OnTouchEvent(e, Parent, out handled);
+	        if (_visualElementRenderer.OnTouchEvent(e, Parent))
+	        {
+		        return true;
+	        }
 
-            return handled ? result : base.OnTouchEvent(e);
+	        return _motionEventHelper.HandleMotionEvent(Parent, e);
         }
 
         void OnElementChanged(ElementChangedEventArgs<Label> e)

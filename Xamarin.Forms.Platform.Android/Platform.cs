@@ -1055,11 +1055,28 @@ namespace Xamarin.Forms.Platform.Android
 		internal class DefaultRenderer : VisualElementRenderer<View>
 		{
 			bool _notReallyHandled;
-			Dictionary<int, float> _minimumElevation = new Dictionary<int, float>();
+			bool _disposed;
+		//	Dictionary<int, float> _minimumElevation = new Dictionary<int, float>();
 
 			public DefaultRenderer()
 			{
-				ChildrenDrawingOrderEnabled = true;
+				if (Forms.IsLollipopOrNewer)
+				{
+					ChildViewAdded += OnChildViewAdded;
+					ChildViewRemoved += OnChildViewRemoved;
+				}
+			}
+
+			void OnChildViewRemoved(object sender, ChildViewRemovedEventArgs childViewRemovedEventArgs)
+			{
+				SortElevations();
+			}
+
+			void OnChildViewAdded(object sender, ChildViewAddedEventArgs childViewAddedEventArgs)
+			{
+				// TODO hartez 2017/09/08 17:24:54 Don't bother turning on the sorting unless at least one Button has been added	
+				// Also, probably don't need to re-sort the elevations when something's removed
+				SortElevations();
 			}
 
 			readonly MotionEventHelper _motionEventHelper = new MotionEventHelper();
@@ -1069,10 +1086,10 @@ namespace Xamarin.Forms.Platform.Android
 				_notReallyHandled = true;
 			}
 
-			internal void InvalidateMinimumElevation()
-			{
-				_minimumElevation = new Dictionary<int, float>();
-			}
+			//internal void InvalidateMinimumElevation()
+			//{
+			//	_minimumElevation = new Dictionary<int, float>();
+			//}
 
 			public override bool OnTouchEvent(MotionEvent e)
 			{
@@ -1130,30 +1147,66 @@ namespace Xamarin.Forms.Platform.Android
 				return result;
 			}
 
-			//protected override int GetChildDrawingOrder(int childCount, int i)
-			//{
-			//	//On Material design the button states use Elevation property, we need to make sure
-			//	//we update the elevation of other controls to be over the previous one
-				if (Forms.IsLollipopOrNewer)
+			void SortElevations()
+			{
+				if (!Forms.IsLollipopOrNewer)
 				{
-			//	if (!_minimumElevation.ContainsKey(i))
+					return;
+				}
+
+				for (int j = 0; j < ChildCount - 1; j++)
+				{
+					System.Diagnostics.Debug.WriteLine($">>>>> DefaultRenderer SortElevations 134: {Element} {Element.AutomationId} sorting...");
+
+					var jc = GetChildAt(j);
+					var jc1 = GetChildAt(j + 1);
+
+					
+
+					System.Diagnostics.Debug.WriteLine($">>>>> DefaultRenderer SortElevations 1164: jc {jc}, elevation {jc.Elevation}");
+					System.Diagnostics.Debug.WriteLine($">>>>> DefaultRenderer SortElevations 1164: jc1 {jc1}, elevation {jc1.Elevation}");
+
+					while (jc.Elevation >= jc1.Elevation)
 					{
-			//		_minimumElevation[i] = GetChildAt(i).Elevation;
+						System.Diagnostics.Debug.WriteLine($">>>>> DefaultRenderer SortElevations 133: Updating some elevations...");
+						// TODO hartez 2017/09/08 18:28:41 Need a way to limit this to Fast Button, and to determine the correct minimum elevation	
+						jc1.Elevation = jc.Elevation + 20;
 					}
-						
-			//	for (int j = 0; j < _minimumElevation.Count() - 1; j++)
-			//	{
-			//		while (_minimumElevation[j] > _minimumElevation[j + 1])
-			//		{
-			//			_minimumElevation[j + 1] = _minimumElevation[j] + 1;
-			//			GetChildAt(j + 1).Elevation = _minimumElevation[j + 1];
-			//		}
-			//		if (j == i)
-			//			break;
+
+					System.Diagnostics.Debug.WriteLine($">>>>> DefaultRenderer SortElevations 1164: jc1 {jc1}, final elevation {jc1.Elevation}");
+
+				//for (int n = 0; n < ChildCount; n++)
+					{
+				//	_minimumElevation[n] = GetChildAt(n).Elevation;
 					}
-			//	}
-			//	return base.GetChildDrawingOrder(childCount, i);
-			//}
+				//// On Material design the button states use Elevation property, we need to make sure
+				//// we update the elevation of other controls to be over the previous one
+				//for (int j = 0; j < ChildCount - 1; j++)
+				//{
+				//	while (_minimumElevation[j] > _minimumElevation[j + 1])
+				//	{
+				//		_minimumElevation[j + 1] = _minimumElevation[j] + 1;
+				//		GetChildAt(j + 1).Elevation = _minimumElevation[j + 1];
+				//	}
+				//}
+			}
+
+			protected override void Dispose(bool disposing)
+			{
+				if (_disposed)
+				{
+					return;
+				}
+
+
+				if (disposing)
+				{
+					ChildViewAdded -= OnChildViewAdded;
+					ChildViewRemoved -= OnChildViewRemoved;
+				}
+
+				base.Dispose(disposing);
+			}
 		}
 
 		#region IPlatformEngine implementation
