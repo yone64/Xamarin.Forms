@@ -21,40 +21,49 @@ namespace Xamarin.Forms.Controls.Issues
 	[Issue(IssueTracker.Bugzilla, 58833, "ListView SelectedItem Binding does not fire", PlatformAffected.Android)]
 	public class Bugzilla58833 : TestContentPage
 	{
-		const string Success = "ItemSelected Success";
-		Label label;
+		const string ItemSelectedSuccess = "ItemSelected Success";
+		const string TapGestureSucess = "TapGesture Fired";
+		Label _resultLabel;
+		static Label s_tapGestureFired;
 
 		[Preserve(AllMembers = true)]
 		class TestCell : ViewCell
 		{
-			Label label;
+			readonly Label _content;
 
 			static int s_index;
 
 			public TestCell()
 			{
-				label = new Label();
-				//label.GestureRecognizers.Add(new TapGestureRecognizer
-				//{
-				//	Command = new Command(() =>
-				//	{
-				//		Debug.WriteLine($">>>>> TapGesture Fired");
-				//	})
-				//});
-				View = label;
+				_content = new Label();
+
+				if (s_index % 2 == 0)
+				{
+					_content.GestureRecognizers.Add(new TapGestureRecognizer
+					{
+						Command = new Command(() =>
+						{
+							s_tapGestureFired.Text = TapGestureSucess;
+						})
+					});
+				}
+
+				View = _content;
 				ContextActions.Add(new MenuItem { Text = s_index++ + " Action" });
 			}
 
 			protected override void OnBindingContextChanged()
 			{
 				base.OnBindingContextChanged();
-				label.Text = (string)BindingContext;
+				_content.Text = (string)BindingContext;
 			}
 		}
 
 		protected override void Init()
 		{
-			label = new Label();
+			_resultLabel = new Label { Text = "Testing..." };
+			s_tapGestureFired = new Label { Text = "Testing..." };
+
 			var items = new List<string>();
 			for (int i = 0; i < 5; i++)
 				items.Add($"Item #{i}");
@@ -69,7 +78,8 @@ namespace Xamarin.Forms.Controls.Issues
 			Content = new StackLayout
 			{
 				Children = {
-					label,
+					_resultLabel,
+					s_tapGestureFired,
 					list
 				}
 			};
@@ -77,17 +87,34 @@ namespace Xamarin.Forms.Controls.Issues
 
 		void List_ItemSelected(object sender, SelectedItemChangedEventArgs e)
 		{
-			label.Text = Success;
+			_resultLabel.Text = ItemSelectedSuccess;
 		}
 
 #if UITEST
 		[Test]
 		public void Bugzilla58833Test()
 		{
-			RunningApp.WaitForElement(q => q.Marked($"Item #1"));
-			RunningApp.Tap(q => q.Marked($"Item #1"));
-			RunningApp.WaitForElement(q => q.Marked(Success));
+			// Item #1 should not have a tap gesture, so it should be selectable
+			RunningApp.WaitForElement(q => q.Marked("Item #1"));
+			RunningApp.Tap(q => q.Marked("Item #1"));
+			RunningApp.WaitForElement(q => q.Marked(ItemSelectedSuccess));
+
+			// Item #2 should have a tap gesture
+			RunningApp.WaitForElement(q => q.Marked("Item #2"));
+			RunningApp.Tap(q => q.Marked("Item #2"));
+			RunningApp.WaitForElement(q => q.Marked(TapGestureSucess));
+
+#if __ANDROID__
+			// Both items should allow a long press
+			RunningApp.TouchAndHold("Item #2");
+			RunningApp.WaitForElement("2 Action");
+			RunningApp.Back();
+			
+			RunningApp.TouchAndHold("Item #1");
+			RunningApp.WaitForElement("1 Action");
+			RunningApp.Back();
+#endif
 		}
 #endif
-	}
+		}
 }
