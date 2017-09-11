@@ -13,7 +13,7 @@ namespace Xamarin.Forms.Platform.Android
 		protected override AView GetCellCore(Cell item, AView convertView, ViewGroup parent, Context context)
 		{
 			var reference = Guid.NewGuid().ToString();
-			Performance.Start(reference);
+			Performance.Start(reference, "GetCellCore");
 			var cell = (ViewCell)item;
 
 			var container = convertView as ViewCellContainer;
@@ -44,7 +44,7 @@ namespace Xamarin.Forms.Platform.Android
 			cell.View.IsPlatformEnabled = true;
 			var c = new ViewCellContainer(context, view, cell, ParentView, unevenRows, rowHeight);
 
-			Performance.Stop(reference);
+			Performance.Stop(reference, "GetCellCore");
 
 			return c;
 		}

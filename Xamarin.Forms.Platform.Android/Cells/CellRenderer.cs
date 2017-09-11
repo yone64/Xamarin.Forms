@@ -70,7 +70,7 @@ namespace Xamarin.Forms.Platform.Android
 		protected virtual AView GetCellCore(Cell item, AView convertView, ViewGroup parent, Context context)
 		{
 			var reference = Guid.NewGuid().ToString();
-			Performance.Start(reference);
+			Performance.Start(reference, "GetCellCore");
 
 			LayoutInflater inflater = LayoutInflater.FromContext(context);
 			const int type = global::Android.Resource.Layout.SimpleListItem1;
@@ -81,7 +81,7 @@ namespace Xamarin.Forms.Platform.Android
 			textView.SetBackgroundColor(global::Android.Graphics.Color.Transparent);
 			view.SetBackgroundColor(global::Android.Graphics.Color.Black);
 
-			Performance.Stop(reference);
+			Performance.Stop(reference, "GetCellCore");
 
 			return view;
 		}

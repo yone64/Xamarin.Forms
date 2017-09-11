@@ -163,9 +163,7 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 		void IVisualElementRenderer.UpdateLayout()
 		{
 			var reference = Guid.NewGuid().ToString();
-			Performance.Start(reference);
 			_tracker?.UpdateLayout();
-			Performance.Stop(reference);
 		}
 
 		protected override void Dispose(bool disposing)
