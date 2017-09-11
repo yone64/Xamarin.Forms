@@ -182,19 +182,9 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 			}
 		}
 
-		// TODO hartez 4:21:33 PM Clean this up
-		//public override bool OnTouchEvent(MotionEvent e)
-		//{
-		//	bool handled;
-		//	var result = _gestureManager.OnTouchEvent(e, Parent, out handled);
-
-		//	return handled ? result : base.OnTouchEvent(e);
-		//}
-
-		// TODO hartez 2017/09/08 16:21:40 Handling the motion event stuff on each class like this probably means we don't need the out parameter anymore	
 		public override bool OnTouchEvent(MotionEvent e)
 		{
-			if (_gestureManager.OnTouchEvent(e, Parent))
+			if (_gestureManager.OnTouchEvent(e))
 			{
 				return true;
 			}

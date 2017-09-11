@@ -45,9 +45,9 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 			Control.SetBackgroundColor((color ?? Element.BackgroundColor).ToAndroid());
 		}
 
-	    public bool OnTouchEvent(MotionEvent e, IViewParent parent)
+	    public bool OnTouchEvent(MotionEvent e)
 	    {
-	        return _gestureManager.OnTouchEvent(e, parent);
+	        return _gestureManager.OnTouchEvent(e);
 	    }
 
 	    public void Dispose()

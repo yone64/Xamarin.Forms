@@ -1,7 +1,6 @@
 ﻿using Xamarin.Forms.CustomAttributes;
 using Xamarin.Forms.Internals;
 using System;
-
 #if UITEST
 using Xamarin.UITest;
 using Xamarin.Forms.Core.UITests;
@@ -12,28 +11,60 @@ namespace Xamarin.Forms.Controls.Issues
 {
 	// TODO hartez 2017/09/06 10:41:01 Fix issue number	
 #if UITEST
-	[Category(UITestCategories.Gestures)]
+	[NUnit.Framework.Category(UITestCategories.Gestures)]
 #endif 
 	[Preserve(AllMembers = true)]
 	[Issue(IssueTracker.Bugzilla, 957515, "PinchGestureRecognizer not getting called on Android ", PlatformAffected.Android)]
-	public class Bugzilla57515 : TestContentPage 
+	public class Bugzilla57515 : TestContentPage
 	{
+		const string ZoomImage = "zoomImg";
+		const string ZoomContainer = "zoomContainer";
+
 		protected override void Init()
 		{
-			Content = new PinchToZoomContainer
+			var layout = new Grid
 			{
-				AutomationId = "zoomContainer",
+				RowDefinitions = new RowDefinitionCollection
+				{
+					new RowDefinition { Height = 80 },
+					new RowDefinition { Height = GridLength.Star }
+				}
+			};
+
+			var scaleLabel = new Label();
+			layout.Children.Add(scaleLabel);
+
+			var pinchToZoomContainer = new PinchToZoomContainer
+			{
+				Margin = new Thickness(80),
+				AutomationId = ZoomContainer,
 				Content = new Image
 				{
-					AutomationId = "zoomImg",
+					AutomationId = ZoomImage,
 					Source = ImageSource.FromFile("oasis.jpg")
 				}
 			};
+
+			Grid.SetRow(pinchToZoomContainer, 1);
+			layout.Children.Add(pinchToZoomContainer);
+
+			scaleLabel.BindingContext = pinchToZoomContainer;
+			scaleLabel.SetBinding(Label.TextProperty, new Binding("CurrentScale"));
+
+			Content = layout;
 		}
 
 		class PinchToZoomContainer : ContentView
 		{
-			double currentScale = 1;
+			public static readonly BindableProperty CurrentScaleProperty = 
+				BindableProperty.Create("CurrentScale", typeof(double), typeof(PinchToZoomContainer), 1.0);
+
+			public double CurrentScale
+			{
+				get { return (double)GetValue(CurrentScaleProperty); }
+				set { SetValue(CurrentScaleProperty, value); }
+			}
+
 			double startScale = 1;
 			double xOffset = 0;
 			double yOffset = 0;
@@ -58,8 +89,8 @@ namespace Xamarin.Forms.Controls.Issues
 				if (e.Status == GestureStatus.Running)
 				{
 					// Calculate the scale factor to be applied.
-					currentScale += (e.Scale - 1) * startScale;
-					currentScale = Math.Max(1, currentScale);
+					CurrentScale += (e.Scale - 1) * startScale;
+					CurrentScale = Math.Max(1, CurrentScale);
 
 					// The ScaleOrigin is in relative coordinates to the wrapped user interface element,
 					// so get the X pixel coordinate.
@@ -76,15 +107,15 @@ namespace Xamarin.Forms.Controls.Issues
 					double originY = (e.ScaleOrigin.Y - deltaY) * deltaHeight;
 
 					// Calculate the transformed element pixel coordinates.
-					double targetX = xOffset - (originX * Content.Width) * (currentScale - startScale);
-					double targetY = yOffset - (originY * Content.Height) * (currentScale - startScale);
+					double targetX = xOffset - (originX * Content.Width) * (CurrentScale - startScale);
+					double targetY = yOffset - (originY * Content.Height) * (CurrentScale - startScale);
 
 					// Apply translation based on the change in origin.
-					Content.TranslationX = targetX.Clamp(-Content.Width * (currentScale - 1), 0);
-					Content.TranslationY = targetY.Clamp(-Content.Height * (currentScale - 1), 0);
+					Content.TranslationX = targetX.Clamp(-Content.Width * (CurrentScale - 1), 0);
+					Content.TranslationY = targetY.Clamp(-Content.Height * (CurrentScale - 1), 0);
 
 					// Apply scale factor
-					Content.Scale = currentScale;
+					Content.Scale = CurrentScale;
 				}
 				if (e.Status == GestureStatus.Completed)
 				{
@@ -99,15 +130,10 @@ namespace Xamarin.Forms.Controls.Issues
 		[Test]
 		public void Bugzilla57515Test()
 		{
-			var img = RunningApp.Query("zoomImg")[0];
-			var rect1 = img.Rect;
-			RunningApp.PinchToZoomIn(c => c.Marked("zoomContainer"));
-			var img2 = RunningApp.Query("zoomImg")[0];
-			var rect2 = img2.Rect;
-
-			// TODO hartez 2017/09/07 12:24:05 Once we get this working, need to find a better way to test it;	
-			// Not sure if the image rect will actually change; also, IApp.PinchToZoomIn doesn't appear to work
-			Assert.Less(rect1.X, rect2.X);
+			RunningApp.WaitForElement(ZoomContainer);
+			RunningApp.WaitForElement("1");
+			RunningApp.PinchToZoomIn(ZoomContainer);
+			RunningApp.WaitForNoElement("1"); // The scale should have changed during the zoom
 		}
 #endif
 	}

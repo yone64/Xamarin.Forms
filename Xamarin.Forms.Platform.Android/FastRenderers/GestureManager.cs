@@ -7,7 +7,6 @@ using Object = Java.Lang.Object;
 namespace Xamarin.Forms.Platform.Android.FastRenderers
 {
 	internal class GestureManager : Object
-		//,global::Android.Views.View.IOnClickListener, global::Android.Views.View.IOnTouchListener
 	{
 		IVisualElementRenderer _renderer;
 		readonly Lazy<GestureDetector> _tapAndPanDetector;
@@ -48,28 +47,10 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 						new ScaleGestureDetector(Control.Context,
 							new InnerScaleListener(_pinchGestureHandler.OnPinch, _pinchGestureHandler.OnPinchStarted,
 								_pinchGestureHandler.OnPinchEnded), Control.Handler));
-
-			//Control.SetOnClickListener(this);
-			//Control.SetOnTouchListener(this);
 		}
 
-		public bool OnTouchEvent(MotionEvent e, IViewParent parent)
+		public bool OnTouchEvent(MotionEvent e)
 		{
-			//if (_inputTransparent)
-			//{
-			//	handled = true;
-			//	return false;
-			//}
-
-			//if (View.GestureRecognizers.Count == 0)
-			//{
-			//	handled = true;
-			//	return _motionEventHelper.HandleMotionEvent(parent, e);
-			//}
-
-			//handled = false;
-			//return false;
-
 			if (!_isEnabled || _inputTransparent)
 			{
 				return false;
@@ -82,6 +63,7 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 					ScaleGestureDetectorCompat.SetQuickScaleEnabled(_scaleDetector.Value, true);
 				eventConsumed = _scaleDetector.Value.OnTouchEvent(e);
 			}
+
 			eventConsumed = _tapAndPanDetector.Value.OnTouchEvent(e) || eventConsumed;
 
 			if (eventConsumed)
@@ -132,9 +114,6 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 					Element.PropertyChanged -= OnElementPropertyChanged;
 				}
 
-				//Control.SetOnClickListener(null);
-				//Control.SetOnTouchListener(null);
-
 				if (_gestureListener != null)
 				{
 					_gestureListener.Dispose();
@@ -146,40 +125,6 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 
 			base.Dispose(disposing);
 		}
-
-		//void global::Android.Views.View.IOnClickListener.OnClick(global::Android.Views.View v)
-		//{
-		//	_tapGestureHandler.OnSingleClick();
-		//}
-
-		//bool global::Android.Views.View.IOnTouchListener.OnTouch(global::Android.Views.View v, MotionEvent e)
-		//{
-  //          if (!_isEnabled)
-  //              return true;
-
-  //          if (_inputTransparent)
-  //              return false;
-
-  //          var handled = false;
-		//	if (_pinchGestureHandler.IsPinchSupported)
-		//	{
-		//		if (!_scaleDetector.IsValueCreated)
-		//			ScaleGestureDetectorCompat.SetQuickScaleEnabled(_scaleDetector.Value, true);
-		//		handled = _scaleDetector.Value.OnTouchEvent(e);
-		//	}
-
-		//	if (_gestureDetector.IsValueCreated && _gestureDetector.Value.Handle == IntPtr.Zero)
-		//	{
-		//		// This gesture detector has already been disposed, probably because it's on a cell which is going away
-		//		return handled;
-		//	}
-
-		//	// It's very important that the gesture detection happen first here
-		//	// if we check handled first, we might short-circuit and never check for tap/pan
-		//	handled = _gestureDetector.Value.OnTouchEvent(e) || handled;
-
-		//	return handled;
-		//}
 
 		void UpdateInputTransparent()
 		{

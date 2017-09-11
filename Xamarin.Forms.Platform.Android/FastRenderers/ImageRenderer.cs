@@ -71,18 +71,9 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 			ElementChanged?.Invoke(this, new VisualElementChangedEventArgs(e.OldElement, e.NewElement));
 		}
 
-		// TODO hartez 4:19:39 PM Clean this up
-		//public override bool OnTouchEvent(MotionEvent e)
-  //      {
-  //          bool handled;
-  //          var result = _visualElementRenderer.OnTouchEvent(e, Parent, out handled);
-
-  //          return handled ? result : base.OnTouchEvent(e);
-  //      }
-
 		public override bool OnTouchEvent(MotionEvent e)
 		{
-			if (_visualElementRenderer.OnTouchEvent(e, Parent))
+			if (_visualElementRenderer.OnTouchEvent(e))
 			{
 				return true;
 			}

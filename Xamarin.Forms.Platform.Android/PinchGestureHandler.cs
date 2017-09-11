@@ -26,7 +26,8 @@ namespace Xamarin.Forms.Platform.Android
 		Func<View> GetView { get; }
 
 		// A View can have at most one pinch gesture, so we just need to look for one (or none)
-		PinchGestureRecognizer PinchGesture => GetView()?.GestureRecognizers.GetGesturesFor<PinchGestureRecognizer>().FirstOrDefault();
+		PinchGestureRecognizer PinchGesture => GetView()?.GestureRecognizers.GetGesturesFor<PinchGestureRecognizer>()
+			.FirstOrDefault();
 
 		public bool OnPinch(float scale, Point scalePoint)
 		{
@@ -40,7 +41,7 @@ namespace Xamarin.Forms.Platform.Android
 				return true;
 
 			var scalePointTransformed = new Point(scalePoint.X / view.Width, scalePoint.Y / view.Height);
-			((IPinchGestureController)pinchGesture).SendPinch(view, 1 + (scale - 1) * _pinchStartingScale, scalePointTransformed);
+			pinchGesture.SendPinch(view, 1 + (scale - 1) * _pinchStartingScale, scalePointTransformed);
 
 			return true;
 		}
@@ -53,8 +54,7 @@ namespace Xamarin.Forms.Platform.Android
 				return;
 
 			PinchGestureRecognizer pinchGesture = PinchGesture;
-			// TODO hartez 9:55:10 AM Clean this up
-			((IPinchGestureController)pinchGesture)?.SendPinchEnded(view);
+			pinchGesture?.SendPinchEnded(view);
 		}
 
 		public bool OnPinchStarted(Point scalePoint)
@@ -72,7 +72,7 @@ namespace Xamarin.Forms.Platform.Android
 
 			var scalePointTransformed = new Point(scalePoint.X / view.Width, scalePoint.Y / view.Height);
 
-			((IPinchGestureController)pinchGesture).SendPinchStarted(view, scalePointTransformed);
+			pinchGesture.SendPinchStarted(view, scalePointTransformed);
 			return true;
 		}
 	}
