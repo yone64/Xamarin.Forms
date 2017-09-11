@@ -14,7 +14,8 @@ namespace Xamarin.Forms.Controls.Issues
     [Category(UITestCategories.Gestures)]
 #endif
     [Preserve(AllMembers = true)]
-    [Issue(IssueTracker.Bugzilla, 925943, "[Android] TapGestureRecognizer does not work with a nested StackLayout", PlatformAffected.Android)]
+    [Issue(IssueTracker.Bugzilla, 25943, 
+		"[Android] TapGestureRecognizer does not work with a nested StackLayout", PlatformAffected.Android)]
     public class Bugzilla25943 : TestContentPage
     {
         Label _result;
