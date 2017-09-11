@@ -45,11 +45,13 @@ namespace Xamarin.Forms.ControlGallery.iOS
 	public class PerformanceTrackerRenderer : ViewRenderer
 	{
 		public const string SubviewAddedMessage = "SubviewAdded";
+		public static bool EnableInstrumentation = false;
 		List<IDisposable> _observers = new List<IDisposable>();
 		bool _SagaStarted = false;
 
 		public PerformanceTrackerRenderer()
 		{
+			EnableInstrumentation = true;
 			MessagingCenter.Instance.Subscribe<IDrawnObservable>(this, SubviewAddedMessage, HandleSubviewAdded);
 		}
 
@@ -64,6 +66,8 @@ namespace Xamarin.Forms.ControlGallery.iOS
 		protected override void Dispose(bool disposing)
 		{
 			DisposeObservers();
+			MessagingCenter.Instance.Unsubscribe<IDrawnObservable>(this, SubviewAddedMessage);
+			EnableInstrumentation = false;
 
 			base.Dispose(disposing);
 		}
@@ -84,6 +88,7 @@ namespace Xamarin.Forms.ControlGallery.iOS
 			{
 				observer.Dispose();
 			}
+			_observers.Clear();
 		}
 
 		void HandleDrawnObserved(NSObservedChange obj)
@@ -165,6 +170,7 @@ namespace Xamarin.Forms.ControlGallery.iOS
 		protected override void Dispose(bool disposing)
 		{
 			_watcher.Dispose();
+			base.Dispose(disposing);
 		}
 	}
 
@@ -207,6 +213,7 @@ namespace Xamarin.Forms.ControlGallery.iOS
 		protected override void Dispose(bool disposing)
 		{
 			_watcher.Dispose();
+			base.Dispose(disposing);
 		}
 	}
 
@@ -249,6 +256,7 @@ namespace Xamarin.Forms.ControlGallery.iOS
 		protected override void Dispose(bool disposing)
 		{
 			_watcher.Dispose();
+			base.Dispose(disposing);
 		}
 	}
 
@@ -291,6 +299,7 @@ namespace Xamarin.Forms.ControlGallery.iOS
 		protected override void Dispose(bool disposing)
 		{
 			_watcher.Dispose();
+			base.Dispose(disposing);
 		}
 	}
 
@@ -333,6 +342,7 @@ namespace Xamarin.Forms.ControlGallery.iOS
 		protected override void Dispose(bool disposing)
 		{
 			_watcher.Dispose();
+			base.Dispose(disposing);
 		}
 	}
 
@@ -375,6 +385,7 @@ namespace Xamarin.Forms.ControlGallery.iOS
 		protected override void Dispose(bool disposing)
 		{
 			_watcher.Dispose();
+			base.Dispose(disposing);
 		}
 	}
 
@@ -549,6 +560,7 @@ namespace Xamarin.Forms.ControlGallery.iOS
 		protected override void Dispose(bool disposing)
 		{
 			_watcher.Dispose();
+			base.Dispose(disposing);
 		}
 	}
 
@@ -591,6 +603,7 @@ namespace Xamarin.Forms.ControlGallery.iOS
 		protected override void Dispose(bool disposing)
 		{
 			_watcher.Dispose();
+			base.Dispose(disposing);
 		}
 	}
 
@@ -633,6 +646,7 @@ namespace Xamarin.Forms.ControlGallery.iOS
 		protected override void Dispose(bool disposing)
 		{
 			_watcher.Dispose();
+			base.Dispose(disposing);
 		}
 	}
 
@@ -675,6 +689,7 @@ namespace Xamarin.Forms.ControlGallery.iOS
 		protected override void Dispose(bool disposing)
 		{
 			_watcher.Dispose();
+			base.Dispose(disposing);
 		}
 	}
 
@@ -717,6 +732,7 @@ namespace Xamarin.Forms.ControlGallery.iOS
 		protected override void Dispose(bool disposing)
 		{
 			_watcher.Dispose();
+			base.Dispose(disposing);
 		}
 	}
 
@@ -759,6 +775,7 @@ namespace Xamarin.Forms.ControlGallery.iOS
 		protected override void Dispose(bool disposing)
 		{
 			_watcher.Dispose();
+			base.Dispose(disposing);
 		}
 	}
 
@@ -801,6 +818,7 @@ namespace Xamarin.Forms.ControlGallery.iOS
 		protected override void Dispose(bool disposing)
 		{
 			_watcher.Dispose();
+			base.Dispose(disposing);
 		}
 	}
 
@@ -843,6 +861,7 @@ namespace Xamarin.Forms.ControlGallery.iOS
 		protected override void Dispose(bool disposing)
 		{
 			_watcher.Dispose();
+			base.Dispose(disposing);
 		}
 	}
 
@@ -885,6 +904,7 @@ namespace Xamarin.Forms.ControlGallery.iOS
 		protected override void Dispose(bool disposing)
 		{
 			_watcher.Dispose();
+			base.Dispose(disposing);
 		}
 	}
 
@@ -927,6 +947,7 @@ namespace Xamarin.Forms.ControlGallery.iOS
 		protected override void Dispose(bool disposing)
 		{
 			_watcher.Dispose();
+			base.Dispose(disposing);
 		}
 	}
 
@@ -947,6 +968,9 @@ namespace Xamarin.Forms.ControlGallery.iOS
 
 		public void SubscribeToDrawn(UIView elem)
 		{
+			if (!PerformanceTrackerRenderer.EnableInstrumentation)
+				return;
+
 			if (elem != _View && elem is IDrawnObservable)
 			{
 				_observers.Add(elem.AddObserver(nameof(IDrawnObservable.Drawn), NSKeyValueObservingOptions.OldNew, HandleDrawnObserved));
@@ -964,6 +988,7 @@ namespace Xamarin.Forms.ControlGallery.iOS
 			{
 				observer.Dispose();
 			}
+			_observers.Clear();
 		}
 
 		void HandleDrawnObserved(NSObservedChange obj)
