@@ -97,7 +97,7 @@ namespace Xamarin.Forms.Controls.Issues
 			layout.RowDefinitions.Add(new RowDefinition());
 
 			var abs = new AbsoluteLayout();
-			var box = new BoxView { Color = Color.BlanchedAlmond, AutomationId = "TheBox"};
+			var box = new BoxView { Color = Color.BlanchedAlmond };
 
 			var label = new Label { BackgroundColor = Color.Chocolate, Text = "Start", Margin = 5 };
 
