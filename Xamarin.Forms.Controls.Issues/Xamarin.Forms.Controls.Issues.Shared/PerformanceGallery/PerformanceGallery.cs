@@ -59,13 +59,13 @@ namespace Xamarin.Forms.Controls.Issues
 			var nextButton = new Button { Text = Pending, IsEnabled = false, AutomationId = NextButtonId };
 			nextButton.Clicked += NextButton_Clicked;
 
-			var testRunRef = new Label { AutomationId = TestRunRefId };
-			testRunRef.SetBinding(Label.TextProperty, nameof(PerformanceViewModel.TestRunReferenceId));
+			ViewModel.TestRunReferenceId = Guid.NewGuid();
+
+			var testRunRef = new Label { AutomationId = TestRunRefId, Text = ViewModel.TestRunReferenceId.ToString() };
 
 			Content = new StackLayout { Children = { testRunRef, nextButton, _PerformanceTracker } };
 
 			ViewModel.BenchmarkResults = await PerformanceDataManager.GetScenarioResults(_DeviceIdentifier);
-			ViewModel.TestRunReferenceId = Guid.NewGuid();
 
 			nextButton.IsEnabled = true;
 			nextButton.Text = Next;
