@@ -3,7 +3,6 @@ using Android.Views;
 using AView = Android.Views.View;
 using Xamarin.Forms.Internals;
 using System;
-using System.Diagnostics;
 using System.Linq;
 using Android.Runtime;
 

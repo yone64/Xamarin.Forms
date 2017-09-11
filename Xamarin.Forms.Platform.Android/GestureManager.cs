@@ -14,13 +14,74 @@ namespace Xamarin.Forms.Platform.Android
 
 		bool _disposed;
 		bool _inputTransparent;
-	    bool _isEnabled;
+		bool _isEnabled;
 
 		VisualElement Element => _renderer?.Element;
 
 		View View => _renderer?.Element as View;
 
 		global::Android.Views.View Control => _renderer?.View;
+
+		public GestureManager(IVisualElementRenderer renderer)
+		{
+			_renderer = renderer;
+			_renderer.ElementChanged += OnElementChanged;
+
+			_tapAndPanDetector = new Lazy<GestureDetector>(InitializeTapAndPanDetector);
+			_scaleDetector = new Lazy<ScaleGestureDetector>(InitializeScaleDetector);
+		}
+
+		public bool OnTouchEvent(MotionEvent e)
+		{
+			if (Control == null)
+			{
+				return false;
+			}
+
+			if (!_isEnabled || _inputTransparent)
+			{
+				return false;
+			}
+
+			if (!DetectorsValid()) 
+			{
+				return false;
+			}
+
+			var eventConsumed = false;
+			if (ViewHasPinchGestures())
+			{
+				eventConsumed = _scaleDetector.Value.OnTouchEvent(e);
+			}
+
+			eventConsumed = _tapAndPanDetector.Value.OnTouchEvent(e) || eventConsumed;
+
+			return eventConsumed;
+		}
+
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+
+		bool DetectorsValid()
+		{
+			// Make sure we're not testing for gestures on old motion events after our 
+			// detectors have already been disposed
+
+			if (_scaleDetector.IsValueCreated && _scaleDetector.Value.Handle == IntPtr.Zero)
+			{
+				return false;
+			}
+
+			if (_tapAndPanDetector.IsValueCreated && _tapAndPanDetector.Value.Handle == IntPtr.Zero)
+			{
+				return false;
+			}
+
+			return true;
+		}
 
 		GestureDetector InitializeTapAndPanDetector()
 		{
@@ -39,41 +100,9 @@ namespace Xamarin.Forms.Platform.Android
 			return detector;
 		}
 
-		public GestureManager(IVisualElementRenderer renderer)
-		{
-			_renderer = renderer;
-			_renderer.ElementChanged += OnElementChanged;
-
-			_tapAndPanDetector = new Lazy<GestureDetector>(InitializeTapAndPanDetector);
-			_scaleDetector = new Lazy<ScaleGestureDetector>(InitializeScaleDetector);
-		}
-
 		bool ViewHasPinchGestures()
 		{
 			return View != null && View.GestureRecognizers.OfType<PinchGestureRecognizer>().Any();
-		}
-
-		public bool OnTouchEvent(MotionEvent e)
-		{
-			if (Control == null)
-			{
-				return false;
-			}
-
-			if (!_isEnabled || _inputTransparent)
-			{
-				return false;
-			}
-
-			var eventConsumed = false;
-			if (ViewHasPinchGestures())
-			{
-				eventConsumed = _scaleDetector.Value.OnTouchEvent(e);
-			}
-
-			eventConsumed = _tapAndPanDetector.Value.OnTouchEvent(e) || eventConsumed;
-
-			return eventConsumed;
 		}
 
 		void OnElementChanged(object sender, VisualElementChangedEventArgs e)
@@ -89,16 +118,16 @@ namespace Xamarin.Forms.Platform.Android
 			}
 
 			UpdateInputTransparent();
-            UpdateIsEnabled();
+			UpdateIsEnabled();
 		}
 
 		void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			if (e.PropertyName == VisualElement.InputTransparentProperty.PropertyName)
 				UpdateInputTransparent();
-            else if (e.PropertyName == VisualElement.IsEnabledProperty.PropertyName)
-                UpdateIsEnabled();
-        }
+			else if (e.PropertyName == VisualElement.IsEnabledProperty.PropertyName)
+				UpdateIsEnabled();
+		}
 
 		protected void Dispose(bool disposing)
 		{
@@ -130,20 +159,14 @@ namespace Xamarin.Forms.Platform.Android
 			_inputTransparent = Element.InputTransparent;
 		}
 
-        void UpdateIsEnabled()
-        {
-            if (Element == null)
-            {
-                return;
-            }
-
-            _isEnabled = Element.IsEnabled;
-        }
-
-		public void Dispose()
+		void UpdateIsEnabled()
 		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
+			if (Element == null)
+			{
+				return;
+			}
+
+			_isEnabled = Element.IsEnabled;
 		}
 	}
 }

@@ -16,7 +16,7 @@ namespace Xamarin.Forms.Platform.Android
 		Func<View> GetView { get; }
 
 		// A View can have at most one pinch gesture, so we just need to look for one (or none)
-		PinchGestureRecognizer PinchGesture => GetView()?.GestureRecognizers.GetGesturesFor<PinchGestureRecognizer>()
+		PinchGestureRecognizer PinchGesture => GetView()?.GestureRecognizers.OfType<PinchGestureRecognizer>()
 			.FirstOrDefault();
 
 		public bool OnPinch(float scale, Point scalePoint)
