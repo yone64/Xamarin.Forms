@@ -13,16 +13,6 @@ namespace Xamarin.Forms.Platform.Android
 			GetView = getView;
 		}
 
-		// TODO hartez 2017/09/08 13:54:55 Really just "has gestures"	
-		public bool IsPinchSupported
-		{
-			get
-			{
-				View view = GetView();
-				return view != null && view.GestureRecognizers.GetGesturesFor<PinchGestureRecognizer>().Any();
-			}
-		}
-
 		Func<View> GetView { get; }
 
 		// A View can have at most one pinch gesture, so we just need to look for one (or none)

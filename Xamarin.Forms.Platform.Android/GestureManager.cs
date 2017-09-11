@@ -1,20 +1,18 @@
 using System;
 using System.ComponentModel;
+using System.Linq;
 using Android.Support.V4.View;
 using Android.Views;
 using Object = Java.Lang.Object;
 
-namespace Xamarin.Forms.Platform.Android.FastRenderers
+namespace Xamarin.Forms.Platform.Android
 {
+	// TODO hartez 2017/09/11 13:41:44 Since this isn't implementing that interface now, this might not need to be a Java.Lang.Object	
 	internal class GestureManager : Object
 	{
 		IVisualElementRenderer _renderer;
 		readonly Lazy<GestureDetector> _tapAndPanDetector;
-		readonly PanGestureHandler _panGestureHandler;
-		readonly PinchGestureHandler _pinchGestureHandler;
 		readonly Lazy<ScaleGestureDetector> _scaleDetector;
-		readonly TapGestureHandler _tapGestureHandler;
-        InnerGestureListener _gestureListener;
 
 		bool _disposed;
 		bool _inputTransparent;
@@ -26,52 +24,58 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 
 		global::Android.Views.View Control => _renderer?.View;
 
+		GestureDetector InitializeTapAndPanDetector()
+		{
+			var listener = new InnerGestureListener(new TapGestureHandler(() => View),
+				new PanGestureHandler(() => View, Control.Context.FromPixels));
+
+			return new GestureDetector(listener);
+		}
+
+		ScaleGestureDetector InitializeScaleDetector()
+		{
+			var listener = new InnerScaleListener(new PinchGestureHandler(() => View));
+			var detector = new ScaleGestureDetector(Control.Context, listener, Control.Handler);
+			ScaleGestureDetectorCompat.SetQuickScaleEnabled(detector, true);
+
+			return detector;
+		}
+
 		public GestureManager(IVisualElementRenderer renderer)
 		{
 			_renderer = renderer;
 			_renderer.ElementChanged += OnElementChanged;
 
-			_tapGestureHandler = new TapGestureHandler(() => View);
-			_panGestureHandler = new PanGestureHandler(() => View, Control.Context.FromPixels);
-			_pinchGestureHandler = new PinchGestureHandler(() => View);
-			_tapAndPanDetector =
-				new Lazy<GestureDetector>(
-					() =>
-						new GestureDetector(
-							_gestureListener =
-								new InnerGestureListener(_tapGestureHandler, _panGestureHandler)));
+			_tapAndPanDetector = new Lazy<GestureDetector>(InitializeTapAndPanDetector);
+			_scaleDetector = new Lazy<ScaleGestureDetector>(InitializeScaleDetector);
+		}
 
-			_scaleDetector =
-				new Lazy<ScaleGestureDetector>(
-					() =>
-						new ScaleGestureDetector(Control.Context,
-							new InnerScaleListener(_pinchGestureHandler.OnPinch, _pinchGestureHandler.OnPinchStarted,
-								_pinchGestureHandler.OnPinchEnded), Control.Handler));
+		bool ViewHasPinchGestures()
+		{
+			return View != null && View.GestureRecognizers.OfType<PinchGestureRecognizer>().Any();
 		}
 
 		public bool OnTouchEvent(MotionEvent e)
 		{
+			if (Control == null)
+			{
+				return false;
+			}
+
 			if (!_isEnabled || _inputTransparent)
 			{
 				return false;
 			}
 
-			bool eventConsumed = false;
-			if (_pinchGestureHandler.IsPinchSupported)
+			var eventConsumed = false;
+			if (ViewHasPinchGestures())
 			{
-				if (!_scaleDetector.IsValueCreated)
-					ScaleGestureDetectorCompat.SetQuickScaleEnabled(_scaleDetector.Value, true);
 				eventConsumed = _scaleDetector.Value.OnTouchEvent(e);
 			}
 
 			eventConsumed = _tapAndPanDetector.Value.OnTouchEvent(e) || eventConsumed;
 
-			if (eventConsumed)
-			{
-				return true;
-			}
-
-			return false;
+			return eventConsumed;
 		}
 
 		void OnElementChanged(object sender, VisualElementChangedEventArgs e)
@@ -112,12 +116,6 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 				if (Element != null)
 				{
 					Element.PropertyChanged -= OnElementPropertyChanged;
-				}
-
-				if (_gestureListener != null)
-				{
-					_gestureListener.Dispose();
-					_gestureListener = null;
 				}
 
 				_renderer = null;

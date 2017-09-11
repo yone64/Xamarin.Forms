@@ -5,6 +5,7 @@ using System.ComponentModel;
 using Android.Support.V4.View;
 using Android.Views;
 using Xamarin.Forms.Internals;
+using Xamarin.Forms.Platform.Android.FastRenderers;
 using AView = Android.Views.View;
 
 namespace Xamarin.Forms.Platform.Android
@@ -13,14 +14,6 @@ namespace Xamarin.Forms.Platform.Android
 		IEffectControlProvider where TElement : VisualElement
 	{
 		readonly List<EventHandler<VisualElementChangedEventArgs>> _elementChangedHandlers = new List<EventHandler<VisualElementChangedEventArgs>>();
-
-		readonly Lazy<GestureDetector> _tapAndPanDetector;
-		InnerGestureListener _tapAndPanListener;
-		readonly TapGestureHandler _tapGestureHandler;
-		readonly PanGestureHandler _panGestureHandler;
-
-		readonly PinchGestureHandler _pinchGestureHandler;
-		Lazy<ScaleGestureDetector> _scaleDetector;
 
 		VisualElementRendererFlags _flags = VisualElementRendererFlags.AutoPackage | VisualElementRendererFlags.AutoTrack;
 
@@ -31,47 +24,17 @@ namespace Xamarin.Forms.Platform.Android
 		
 		VisualElementPackager _packager;
 		PropertyChangedEventHandler _propertyChangeHandler;
-		
+
+		readonly GestureManager _gestureManager;
+
 		protected VisualElementRenderer() : base(Forms.Context)
 		{
-			_tapGestureHandler = new TapGestureHandler(() => View);
-			_panGestureHandler = new PanGestureHandler(() => View, Context.FromPixels);
-			_pinchGestureHandler = new PinchGestureHandler(() => View);
-
-			_tapAndPanDetector =
-				new Lazy<GestureDetector>(
-					() =>
-					new GestureDetector(
-						_tapAndPanListener = new InnerGestureListener(_tapGestureHandler, _panGestureHandler)));
-
-			_scaleDetector = new Lazy<ScaleGestureDetector>(
-					() => new ScaleGestureDetector(Context, new InnerScaleListener(_pinchGestureHandler.OnPinch, _pinchGestureHandler.OnPinchStarted, _pinchGestureHandler.OnPinchEnded))
-					);
+			_gestureManager = new GestureManager(this);
 		}
 
 		public override bool OnTouchEvent(MotionEvent e)
 		{
-			if (!Enabled)
-			{
-				return false;
-			}
-
-			bool eventConsumed = false;
-			if (_pinchGestureHandler.IsPinchSupported)
-			{
-				if (!_scaleDetector.IsValueCreated)
-					ScaleGestureDetectorCompat.SetQuickScaleEnabled(_scaleDetector.Value, true);
-				eventConsumed = _scaleDetector.Value.OnTouchEvent(e);
-			}
-
-			eventConsumed = _tapAndPanDetector.Value.OnTouchEvent(e) || eventConsumed;
-
-			if (eventConsumed)
-			{
-				return true;
-			}
-
-			return base.OnTouchEvent(e);
+			return _gestureManager.OnTouchEvent(e);
 		}
 
 		public override bool OnInterceptTouchEvent(MotionEvent ev)
@@ -257,19 +220,6 @@ namespace Xamarin.Forms.Platform.Android
 					_packager = null;
 				}
 
-				// TODO hartez 2:47:03 PM Clean these up or maybe we can get rid of them? Not sure yet
-				if (_scaleDetector != null && _scaleDetector.IsValueCreated)
-				{
-					_scaleDetector.Value.Dispose();
-					_scaleDetector = null;
-				}
-
-				if (_tapAndPanListener != null)
-				{
-					_tapAndPanListener.Dispose();
-					_tapAndPanListener = null;
-				}
-
 				if (ManageNativeControlLifetime)
 				{
 					int count = ChildCount;
@@ -414,8 +364,6 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			InputTransparent = Element.InputTransparent;
 		}
-
-		
 
 		protected void SetPackager(VisualElementPackager packager)
 		{
