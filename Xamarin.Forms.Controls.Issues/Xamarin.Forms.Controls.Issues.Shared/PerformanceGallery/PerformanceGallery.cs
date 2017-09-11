@@ -61,7 +61,16 @@ namespace Xamarin.Forms.Controls.Issues
 
 			ViewModel.TestRunReferenceId = Guid.NewGuid();
 
-			var testRunRef = new Label { AutomationId = TestRunRefId, Text = ViewModel.TestRunReferenceId.ToString() };
+			var testRunRef = new Label
+			{
+				AutomationId = TestRunRefId,
+				Text = ViewModel.TestRunReferenceId.ToString(),
+				FontSize = 6,
+				HorizontalTextAlignment = TextAlignment.Center,
+				VerticalTextAlignment = TextAlignment.Center,
+				BackgroundColor = Color.Accent,
+				TextColor = Color.White
+			};
 
 			Content = new StackLayout { Children = { testRunRef, nextButton, _PerformanceTracker } };
 
@@ -116,14 +125,14 @@ namespace Xamarin.Forms.Controls.Issues
 		{
 			var result = DisplayResults();
 
-			PerformanceDataManager.PostScenarioResults(ViewModel.Scenario, 
-				result, 
-				ViewModel.TestRunReferenceId, 
-				_DeviceIdentifier, 
-				_DevicePlatform, 
-				_DeviceVersionNumber, 
-				_DeviceIdiom, 
-				ViewModel.ActualRenderTime, 
+			PerformanceDataManager.PostScenarioResults(ViewModel.Scenario,
+				result,
+				ViewModel.TestRunReferenceId,
+				_DeviceIdentifier,
+				_DevicePlatform,
+				_DeviceVersionNumber,
+				_DeviceIdiom,
+				ViewModel.ActualRenderTime,
 				_PerformanceProvider.Statistics);
 		}
 
