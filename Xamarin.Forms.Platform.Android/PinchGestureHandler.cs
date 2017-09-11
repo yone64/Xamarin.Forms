@@ -53,6 +53,7 @@ namespace Xamarin.Forms.Platform.Android
 				return;
 
 			PinchGestureRecognizer pinchGesture = PinchGesture;
+			// TODO hartez 9:55:10 AM Clean this up
 			((IPinchGestureController)pinchGesture)?.SendPinchEnded(view);
 		}
 
