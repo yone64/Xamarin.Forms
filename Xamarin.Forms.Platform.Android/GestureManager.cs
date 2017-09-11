@@ -3,12 +3,10 @@ using System.ComponentModel;
 using System.Linq;
 using Android.Support.V4.View;
 using Android.Views;
-using Object = Java.Lang.Object;
 
 namespace Xamarin.Forms.Platform.Android
 {
-	// TODO hartez 2017/09/11 13:41:44 Since this isn't implementing that interface now, this might not need to be a Java.Lang.Object	
-	internal class GestureManager : Object
+	internal class GestureManager : IDisposable
 	{
 		IVisualElementRenderer _renderer;
 		readonly Lazy<GestureDetector> _tapAndPanDetector;
@@ -102,7 +100,7 @@ namespace Xamarin.Forms.Platform.Android
                 UpdateIsEnabled();
         }
 
-		protected override void Dispose(bool disposing)
+		protected void Dispose(bool disposing)
 		{
 			if (_disposed)
 			{
@@ -120,8 +118,6 @@ namespace Xamarin.Forms.Platform.Android
 
 				_renderer = null;
 			}
-
-			base.Dispose(disposing);
 		}
 
 		void UpdateInputTransparent()
@@ -143,5 +139,11 @@ namespace Xamarin.Forms.Platform.Android
 
             _isEnabled = Element.IsEnabled;
         }
-    }
+
+		public void Dispose()
+		{
+			Dispose(true);
+			GC.SuppressFinalize(this);
+		}
+	}
 }
