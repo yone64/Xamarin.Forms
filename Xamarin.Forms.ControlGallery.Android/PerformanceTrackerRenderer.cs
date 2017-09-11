@@ -1,4 +1,4 @@
-﻿using Android.Views;
+﻿using AView = Android.Views.View;
 using System;
 using System.ComponentModel;
 using Xamarin.Forms;
@@ -6,6 +6,7 @@ using Xamarin.Forms.ControlGallery.Android;
 using Xamarin.Forms.Controls;
 using Xamarin.Forms.Platform.Android;
 using static Android.Views.ViewTreeObserver;
+using Android.Views;
 
 [assembly: ExportRenderer(typeof(PerformanceTracker), typeof(PerformanceTrackerRenderer))]
 
@@ -37,31 +38,39 @@ namespace Xamarin.Forms.ControlGallery.Android
 			}
 		}
 
-		static void SubscribeChildrenToDraw(ViewGroup viewGroup, IOnDrawListener observer)
+		static void SubscribeChildrenToDraw(AView view, IOnDrawListener observer)
 		{
+			if (view == null)
+				return;
+
+			view.ViewTreeObserver.AddOnDrawListener(observer);
+
+			var viewGroup = view as ViewGroup;
+
 			if (viewGroup == null)
 				return;
 
 			for (int i = 0; i < viewGroup.ChildCount; i++)
 			{
-				var child = viewGroup.GetChildAt(i);
-				child.ViewTreeObserver.AddOnDrawListener(observer);
-
-				SubscribeChildrenToDraw(child as ViewGroup, observer);
+				SubscribeChildrenToDraw(viewGroup.GetChildAt(i), observer);
 			}
 		}
 
-		static void UnsubscribeChildrenToDraw(ViewGroup viewGroup, IOnDrawListener observer)
+		static void UnsubscribeChildrenToDraw(AView view, IOnDrawListener observer)
 		{
+			if (view == null)
+				return;
+
+			view.ViewTreeObserver.RemoveOnDrawListener(observer);
+
+			var viewGroup = view as ViewGroup;
+
 			if (viewGroup == null)
 				return;
 
 			for (int i = 0; i < viewGroup.ChildCount; i++)
 			{
-				var child = viewGroup.GetChildAt(i);
-				child.ViewTreeObserver.RemoveOnDrawListener(observer);
-
-				UnsubscribeChildrenToDraw(child as ViewGroup, observer);
+				UnsubscribeChildrenToDraw(viewGroup.GetChildAt(i), observer);
 			}
 		}
 	}

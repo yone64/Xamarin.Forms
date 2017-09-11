@@ -160,6 +160,7 @@
     <Compile Include="CustomRenderer40251.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="AppDelegate.cs" />
+    <Compile Include="PerformanceTrackerRenderer.cs" />
     <Compile Include="_57114Renderer.cs" />
     <Compile Include="_58406EffectRenderer.cs" />
     <None Include="app.config" />
