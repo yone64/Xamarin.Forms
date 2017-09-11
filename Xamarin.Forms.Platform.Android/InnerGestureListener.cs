@@ -46,50 +46,14 @@ namespace Xamarin.Forms.Platform.Android
 
 		bool HasAnyGestures()
 		{
-			// TODO hartez 2017/09/07 16:46:50 Make sure to get rid of the old constructor; this method won't work with it	
 			return _panGestureHandler.HasAnyGestures() || _tapGestureHandler.HasAnyGestures();
 		}
-
-		// TODO hartez 5:13:27 PM Clean this up
-		//public InnerGestureListener(Func<int, bool> tapDelegate, 
-		//	Func<int, IEnumerable<TapGestureRecognizer>> tapGestureRecognizers, 
-		//	Func<float, float, int, bool> scrollDelegate,
-		//	Func<int, bool> scrollStartedDelegate, Func<bool> scrollCompleteDelegate)
-		//{
-		//	if (tapDelegate == null)
-		//		throw new ArgumentNullException(nameof(tapDelegate));
-		//	if (tapGestureRecognizers == null)
-		//		throw new ArgumentNullException(nameof(tapGestureRecognizers));
-		//	if (scrollDelegate == null)
-		//		throw new ArgumentNullException(nameof(scrollDelegate));
-		//	if (scrollStartedDelegate == null)
-		//		throw new ArgumentNullException(nameof(scrollStartedDelegate));
-		//	if (scrollCompleteDelegate == null)
-		//		throw new ArgumentNullException(nameof(scrollCompleteDelegate));
-
-		//	_tapDelegate = tapDelegate;
-		//	_tapGestureRecognizers = tapGestureRecognizers;
-		//	_scrollDelegate = scrollDelegate;
-		//	_scrollStartedDelegate = scrollStartedDelegate;
-		//	_scrollCompleteDelegate = scrollCompleteDelegate;
-		//}
 
 		// This is needed because GestureRecognizer callbacks can be delayed several hundred milliseconds
 		// which can result in the need to resurrect this object if it has already been disposed. We dispose
 		// eagerly to allow easier garbage collection of the renderer
 		internal InnerGestureListener(IntPtr handle, JniHandleOwnership ownership) : base(handle, ownership)
 		{
-		}
-
-		internal void OnTouchEvent(MotionEvent e)
-		{
-			// TODO hartez 2017/08/23 10:36:33 The FastRenderers GestureManager doesn't call this at all	
-			// - maybe it's not really necessary?
-
-			if (e.Action == MotionEventActions.Up)
-				EndScrolling();
-			else if (e.Action == MotionEventActions.Move)
-				StartScrolling(e);
 		}
 
 		bool GestureDetector.IOnDoubleTapListener.OnDoubleTap(MotionEvent e)

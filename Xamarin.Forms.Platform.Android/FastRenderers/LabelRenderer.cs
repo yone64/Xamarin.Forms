@@ -29,9 +29,6 @@ namespace Xamarin.Forms.Platform.Android.FastRenderers
 
 		public LabelRenderer() : base(Forms.Context)
 		{
-			// TODO hartez 3:38:21 PM Clean this up
-			System.Diagnostics.Debug.WriteLine($">>>>> LabelRenderer LabelRenderer 32: FastRenderers Confirmed!");
-
 			_labelTextColorDefault = TextColors;
 			_visualElementRenderer = new VisualElementRenderer(this);
 		}

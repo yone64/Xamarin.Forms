@@ -13,10 +13,8 @@ namespace Xamarin.Forms.Controls.Issues
 	[Category(UITestCategories.InputTransparent)]
 #endif
 
-	// TODO hartez 6:10:25 PM Clean this up - fix issue number
-	
 	[Preserve(AllMembers = true)]
-	[Issue(IssueTracker.Bugzilla, 940173, "Android BoxView/Frame not clickthrough in ListView")]
+	[Issue(IssueTracker.Bugzilla, 40173, "Android BoxView/Frame not clickthrough in ListView")]
 	public class Bugzilla40173 : TestContentPage
 	{
 		const string CantTouchButtonId = "CantTouchButtonId";

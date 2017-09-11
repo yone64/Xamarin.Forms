@@ -9,12 +9,11 @@ using NUnit.Framework;
 
 namespace Xamarin.Forms.Controls.Issues
 {
-	// TODO hartez 2017/09/06 10:41:01 Fix issue number	
 #if UITEST
-	[NUnit.Framework.Category(UITestCategories.Gestures)]
+	[Category(UITestCategories.Gestures)]
 #endif 
 	[Preserve(AllMembers = true)]
-	[Issue(IssueTracker.Bugzilla, 957515, "PinchGestureRecognizer not getting called on Android ", PlatformAffected.Android)]
+	[Issue(IssueTracker.Bugzilla, 57515, "PinchGestureRecognizer not getting called on Android ", PlatformAffected.Android)]
 	public class Bugzilla57515 : TestContentPage
 	{
 		const string ZoomImage = "zoomImg";

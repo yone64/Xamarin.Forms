@@ -1,5 +1,4 @@
 ﻿using System;
-
 using Xamarin.Forms.CustomAttributes;
 using Xamarin.Forms.Internals;
 #if UITEST
@@ -14,9 +13,8 @@ namespace Xamarin.Forms.Controls.Issues
 	[Category(UITestCategories.Gestures)]
 #endif
 
-	// TODO hartez 2:26:25 PM Clean this up (issue number)
 	[Preserve (AllMembers = true)]
-	[Issue (IssueTracker.Bugzilla, 924574, "Tap Double Tap")]
+	[Issue (IssueTracker.Bugzilla, 24574, "Tap Double Tap")]
 	public class Issue24574 : TestContentPage 
 	{
 		protected override void Init ()
@@ -27,11 +25,11 @@ namespace Xamarin.Forms.Controls.Issues
 				FontSize = 50
 			};
 
-			var rec = new TapGestureRecognizer () { NumberOfTapsRequired = 1 };
+			var rec = new TapGestureRecognizer { NumberOfTapsRequired = 1 };
 			rec.Tapped += (s, e) => { label.Text = "Single"; };
 			label.GestureRecognizers.Add (rec);
 
-			rec = new TapGestureRecognizer () { NumberOfTapsRequired = 2 };
+			rec = new TapGestureRecognizer { NumberOfTapsRequired = 2 };
 			rec.Tapped += (s, e) => { label.Text = "Double"; };
 			label.GestureRecognizers.Add (rec);
 

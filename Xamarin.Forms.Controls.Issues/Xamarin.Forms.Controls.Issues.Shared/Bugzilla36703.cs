@@ -14,9 +14,9 @@ namespace Xamarin.Forms.Controls.Issues
 	[Category(UITestCategories.IsEnabled)]
 #endif
 
-	// TODO hartez 12:54:26 PM Clean this up - restore issue number
 	[Preserve(AllMembers = true)]
-	[Issue(IssueTracker.Bugzilla, 936703, "TapGestureRecognizer inside initially disable Image will never fire Tapped event", PlatformAffected.All)]
+	[Issue(IssueTracker.Bugzilla, 36703, 
+		"TapGestureRecognizer inside initially disable Image will never fire Tapped event", PlatformAffected.All)]
 	public class Bugzilla36703 : TestContentPage
 	{
 		const string TestImage = "testimage";
@@ -29,7 +29,9 @@ namespace Xamarin.Forms.Controls.Issues
 			var image = new Image { Source = "coffee.png", IsEnabled = false, AutomationId = TestImage };
 			var button = new Button { Text = $"Toggle IsEnabled (now {image.IsEnabled})", AutomationId = Toggle };
 			var resultLabel = new Label { Text = "Testing..."};
-			var instructions = new Label { Text = $"Tap the image. The '{Testing}' label should remain unchanged. Tap the 'Toggle IsEnabled' button. Now tap the image again. The {Testing} Label should change its text to {Success}." };
+			var instructions = new Label { Text = $"Tap the image. The '{Testing}' label should remain unchanged. " 
+				+ $"Tap the 'Toggle IsEnabled' button. Now tap the image again." 
+				+ $" The {Testing} Label should change its text to {Success}." };
 			
 			button.Clicked += (sender, args) =>
 			{

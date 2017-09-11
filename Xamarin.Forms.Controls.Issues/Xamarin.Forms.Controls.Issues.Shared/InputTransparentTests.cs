@@ -17,9 +17,8 @@ namespace Xamarin.Forms.Controls.Issues
 	[Category(UITestCategories.InputTransparent)]
 #endif
 
-	// TODO hartez 10:01:10 AM Clean this up - change tracker back
 	[Preserve(AllMembers = true)]
-	[Issue(IssueTracker.Bugzilla, 8675309, "Test InputTransparent true/false on various controls")]
+	[Issue(IssueTracker.None, 8675309, "Test InputTransparent true/false on various controls")]
 	public class InputTransparentTests : TestNavigationPage
 	{
 		const string TargetAutomationId = "inputtransparenttarget";
