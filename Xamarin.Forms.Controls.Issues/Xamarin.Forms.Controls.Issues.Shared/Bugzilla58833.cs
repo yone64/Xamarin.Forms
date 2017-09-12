@@ -104,16 +104,23 @@ namespace Xamarin.Forms.Controls.Issues
 			RunningApp.Tap(q => q.Marked("Item #2"));
 			RunningApp.WaitForElement(q => q.Marked(TapGestureSucess));
 
-#if __ANDROID__
-			// Both items should allow a long press
-			RunningApp.TouchAndHold("Item #2");
+			// Both items should allow access to the context menu
+			RunningApp.ActivateContextMenu("Item #2");
 			RunningApp.WaitForElement("2 Action");
+#if __ANDROID__
 			RunningApp.Back();
-			
-			RunningApp.TouchAndHold("Item #1");
-			RunningApp.WaitForElement("1 Action");
-			RunningApp.Back();
+#else 
+			RunningApp.Tap(q => q.Marked("Item #3"));
 #endif
+
+			RunningApp.ActivateContextMenu("Item #1");
+			RunningApp.WaitForElement("1 Action");
+#if __ANDROID__
+			RunningApp.Back();
+#else 
+			RunningApp.Tap(q => q.Marked("Item #3"));
+#endif
+
 		}
 #endif
 		}
