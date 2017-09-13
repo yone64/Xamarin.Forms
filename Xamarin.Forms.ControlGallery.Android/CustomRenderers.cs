@@ -541,7 +541,12 @@ namespace Xamarin.Forms.ControlGallery.Android
 		}
 	}
 
-	public class QuickCollectNavigationPage : Xamarin.Forms.Platform.Android.AppCompat.NavigationPageRenderer
+	public class QuickCollectNavigationPage
+#if FORMS_APPLICATION_ACTIVITY
+		: Xamarin.Forms.Platform.Android.NavigationRenderer
+#else
+		: Xamarin.Forms.Platform.Android.AppCompat.NavigationPageRenderer
+#endif
 	{
 		bool _disposed;
 		NavigationPage _page;
