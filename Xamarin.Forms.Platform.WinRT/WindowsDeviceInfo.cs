@@ -51,6 +51,9 @@ namespace Xamarin.Forms.Platform.WinRT
 		{
 			get
 			{
+#if WINDOWS_UWP
+				return DisplayInformation.GetForCurrentView().RawPixelsPerViewPixel;
+#else
 				ResolutionScale scale = _information.ResolutionScale;
 				switch (scale)
 				{
@@ -70,6 +73,7 @@ namespace Xamarin.Forms.Platform.WinRT
 					default:
 						return 1;
 				}
+#endif
 			}
 		}
 
