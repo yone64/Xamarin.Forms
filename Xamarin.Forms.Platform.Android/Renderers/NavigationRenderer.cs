@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Android.Views;
 using Xamarin.Forms.Internals;
@@ -287,7 +288,10 @@ namespace Xamarin.Forms.Platform.Android
 						}
 						s_currentAnimation = null;
 						tcs.TrySetResult(true);
-						((Platform)Element.Platform).NavAnimationInProgress = false;
+						if (Element?.Platform != null)
+						{
+							((Platform)Element.Platform).NavAnimationInProgress = false;
+						}
 					} });
 				}
 			}
