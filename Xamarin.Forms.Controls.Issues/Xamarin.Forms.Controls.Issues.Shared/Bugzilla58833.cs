@@ -31,7 +31,7 @@ namespace Xamarin.Forms.Controls.Issues
 		{
 			readonly Label _content;
 
-			static int s_index;
+			internal static int s_index;
 
 			public TestCell()
 			{
@@ -61,6 +61,8 @@ namespace Xamarin.Forms.Controls.Issues
 
 		protected override void Init()
 		{
+			TestCell.s_index = 0;
+
 			_resultLabel = new Label { Text = "Testing..." };
 			s_tapGestureFired = new Label { Text = "Testing..." };
 
@@ -91,6 +93,8 @@ namespace Xamarin.Forms.Controls.Issues
 		}
 
 #if UITEST
+		protected override bool Isolate => true;
+
 		[Test]
 		public void Bugzilla58833Test()
 		{
