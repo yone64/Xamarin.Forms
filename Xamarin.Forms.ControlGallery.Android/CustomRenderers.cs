@@ -533,12 +533,19 @@ namespace Xamarin.Forms.ControlGallery.Android
 	//	}
  // }
  
-	public class NoFlashTestNavigationPage : Xamarin.Forms.Platform.Android.AppCompat.NavigationPageRenderer
+	public class NoFlashTestNavigationPage 
+#if FORMS_APPLICATION_ACTIVITY
+		: Xamarin.Forms.Platform.Android.NavigationRenderer
+#else
+		: Xamarin.Forms.Platform.Android.AppCompat.NavigationPageRenderer
+#endif
 	{
+#if !FORMS_APPLICATION_ACTIVITY
 		protected override void SetupPageTransition(global::Android.Support.V4.App.FragmentTransaction transaction, bool isPush)
 		{
 			transaction.SetTransition((int)FragmentTransit.None);
 		}
+#endif
 	}
 
 	public class QuickCollectNavigationPage

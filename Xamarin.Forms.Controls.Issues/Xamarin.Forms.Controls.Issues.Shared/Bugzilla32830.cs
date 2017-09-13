@@ -118,7 +118,7 @@ namespace Xamarin.Forms.Controls.Issues
 		{
 			public MyTabs()
 			{
-				Children.Add(new NavigationPage(new Page1()));
+				Children.Add(new Page1());
 				Children.Add(new Page2());
 			}
 		}
