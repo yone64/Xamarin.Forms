@@ -46,7 +46,11 @@ namespace Xamarin.Forms.Controls.Issues
 			_DeviceIdentifier = CrossDeviceInfo.Current.Id;
 			_DeviceIdiom = CrossDeviceInfo.Current.Idiom.ToString();
 			_DeviceModel = CrossDeviceInfo.Current.Model;
+#if __ANDROID__ && TEST_EXPERIMENTAL_RENDERERS
+			_DevicePlatform = "Android Fast Renderers";
+#else
 			_DevicePlatform = CrossDeviceInfo.Current.Platform.ToString();
+#endif
 			_DeviceVersionNumber = CrossDeviceInfo.Current.VersionNumber.ToString();
 
 			MessagingCenter.Subscribe<PerformanceTracker>(this, PerformanceTracker.RenderCompleteMessage, HandleRenderComplete);
