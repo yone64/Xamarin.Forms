@@ -145,10 +145,12 @@ namespace Xamarin.Forms.Controls.Issues
 
 		static void IgnoreFormsApplicationActivity()
 		{
+#if __ANDROID__
 			if (AppSetup.IsFormsApplicationActivity)
 			{
 				Assert.Ignore("This test only applies to FormsAppCompatActivity.");
 			}
+#endif
 		}
 #endif
 	}
