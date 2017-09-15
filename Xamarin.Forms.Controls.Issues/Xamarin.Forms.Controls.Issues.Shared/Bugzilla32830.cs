@@ -118,7 +118,7 @@ namespace Xamarin.Forms.Controls.Issues
 		{
 			public MyTabs()
 			{
-				Children.Add(new Page1());
+				Children.Add(new NavigationPage(new Page1()));
 				Children.Add(new Page2());
 			}
 		}
@@ -133,12 +133,22 @@ namespace Xamarin.Forms.Controls.Issues
 		[Test]
 		public void Bugzilla32830Test()
 		{
+			IgnoreFormsApplicationActivity();
+
 			RunningApp.WaitForElement(q => q.Marked(BottomLabel));
 			RunningApp.WaitForElement(q => q.Marked(Button1));
 			RunningApp.Tap(q => q.Marked(Button1));
 			RunningApp.WaitForElement(q => q.Marked(Button2));
 			RunningApp.Tap(q => q.Marked(Button2));
 			RunningApp.WaitForElement(q => q.Marked(BottomLabel));
+		}
+
+		static void IgnoreFormsApplicationActivity()
+		{
+			if (AppSetup.IsFormsApplicationActivity)
+			{
+				Assert.Ignore("This test only applies to FormsAppCompatActivity.");
+			}
 		}
 #endif
 	}
