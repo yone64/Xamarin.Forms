@@ -43,10 +43,10 @@ namespace Xamarin.Forms.ControlGallery.Android
 			if (!Debugger.IsAttached)
 				Insights.Initialize(App.InsightsApiKey, ApplicationContext);
 
-			Forms.SetFlags("Fake_Flag"); // So we can test for flag initialization issues
-
 #if TEST_EXPERIMENTAL_RENDERERS
 			Forms.SetFlags("FastRenderers_Experimental");
+#else
+			Forms.SetFlags("Fake_Flag"); // So we can test for flag initialization issues
 #endif
 
 			Forms.Init(this, bundle);
