@@ -17,7 +17,8 @@ namespace Xamarin.Forms.ControlGallery.Android
 
 	[Activity(Label = "Control Gallery", Icon = "@drawable/icon", Theme = "@style/MyTheme",
 		MainLauncher = true, HardwareAccelerated = true, 
-		ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
+		ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation
+		)]
 	[IntentFilter(new[] { Intent.ActionView },
 		Categories = new[]
 		{
@@ -42,6 +43,8 @@ namespace Xamarin.Forms.ControlGallery.Android
 
 			if (!Debugger.IsAttached)
 				Insights.Initialize(App.InsightsApiKey, ApplicationContext);
+
+			Forms.SetFlags("Fake_Flag"); // So we can test for flag initialization issues
 
 #if TEST_EXPERIMENTAL_RENDERERS
 			Forms.SetFlags("FastRenderers_Experimental");
@@ -70,6 +73,8 @@ namespace Xamarin.Forms.ControlGallery.Android
 
 			// Listen for the message from the status bar color toggle test
 			MessagingCenter.Subscribe<AndroidStatusBarColor>(this, AndroidStatusBarColor.Message, color => SetStatusBarColor(global::Android.Graphics.Color.Red));
+
+			SetUpForceRestartTest();
 
 			LoadApplication(_app);
 		}
