@@ -161,7 +161,7 @@ namespace Xamarin.Forms.ControlGallery.Android
 
 				if (uiModeManager.CurrentModeType == UiMode.TypeCar)
 				{
-					// If for some reason we're already in card mode, disable it
+					// If for some reason we're already in car mode, disable it
 					uiModeManager.DisableCarMode(DisableCarModeFlags.None);
 				}
 				

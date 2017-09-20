@@ -17,8 +17,7 @@ namespace Xamarin.Forms.ControlGallery.Android
 
 	[Activity(Label = "Control Gallery", Icon = "@drawable/icon", Theme = "@style/MyTheme",
 		MainLauncher = true, HardwareAccelerated = true, 
-		ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation
-		)]
+		ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation)]
 	[IntentFilter(new[] { Intent.ActionView },
 		Categories = new[]
 		{
