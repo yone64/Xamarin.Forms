@@ -28,7 +28,7 @@ namespace Xamarin.Forms.Controls.Issues
 				Padding = new Thickness(0, 20, 0, 0),
 				Children =
 				{
-					new Label { Text = "11" }
+					new Label { Text = Success }
 				}
 			};
 
