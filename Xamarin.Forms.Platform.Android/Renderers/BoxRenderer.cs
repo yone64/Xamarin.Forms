@@ -1,5 +1,6 @@
 using System.ComponentModel;
 using Android.Views;
+using Xamarin.Forms.PlatformConfiguration.AndroidSpecific;
 
 namespace Xamarin.Forms.Platform.Android
 {
@@ -27,6 +28,15 @@ namespace Xamarin.Forms.Platform.Android
 			_motionEventHelper.UpdateElement(e.NewElement);
 
 			UpdateBackgroundColor();
+
+			if (Forms.IsLollipopOrNewer)
+			{
+				var elevation = e.NewElement.OnThisPlatform().GetElevation();
+				if (elevation.HasValue)
+				{
+					Elevation = elevation.Value;
+				}
+			}
 		}
 
 		protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
