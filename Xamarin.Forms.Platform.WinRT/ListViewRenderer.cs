@@ -483,6 +483,7 @@ namespace Xamarin.Forms.Platform.WinRT
 
 		void OnControlSelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
+#if !WINDOWS_UWP
 			RestorePreviousSelectedVisual();
 
 			if (e.AddedItems.Count == 0)
@@ -500,7 +501,6 @@ namespace Xamarin.Forms.Platform.WinRT
 			if (cell == null)
 				return;
 
-#if !WINDOWS_UWP
 			if (Device.Idiom == TargetIdiom.Phone)
 			{
 				FrameworkElement element = FindElement(cell);
@@ -525,15 +525,8 @@ namespace Xamarin.Forms.Platform.WinRT
 			return null;
 		}
 
-#if WINDOWS_UWP
-		void RestorePreviousSelectedVisual()
-		{
-		}
+#if !WINDOWS_UWP
 
-		void SetSelectedVisual(FrameworkElement element)
-		{
-		}
-#else
 		void RestorePreviousSelectedVisual()
 		{
 			foreach (BrushedElement highlight in _highlightedElements)
