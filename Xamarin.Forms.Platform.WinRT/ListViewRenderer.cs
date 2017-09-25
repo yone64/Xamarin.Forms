@@ -28,6 +28,7 @@ namespace Xamarin.Forms.Platform.WinRT
 	public class ListViewRenderer : ViewRenderer<ListView, FrameworkElement>
 	{
 		ITemplatedItemsView<Cell> TemplatedItemsView => Element;
+		bool _itemWasClicked;
 		bool _subscribedToItemClick;
 		bool _subscribedToTapped;
 
@@ -530,6 +531,7 @@ namespace Xamarin.Forms.Platform.WinRT
 #endif
 
 			Element.NotifyRowTapped(index, cell: null);
+			_itemWasClicked = true;
 
 #if !WINDOWS_UWP
 
@@ -589,8 +591,10 @@ namespace Xamarin.Forms.Platform.WinRT
 				}
 			}
 #endif
-			if (Element.SelectedItem != List.SelectedItem)
+			if (Element.SelectedItem != List.SelectedItem && !_itemWasClicked)
 				((IElementController)Element).SetValueFromRenderer(ListView.SelectedItemProperty, List.SelectedItem);
+
+			_itemWasClicked = false;
 		}
 
 		FrameworkElement FindElement(object cell)
