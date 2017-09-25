@@ -1,10 +1,13 @@
-﻿using Xamarin.Forms.CustomAttributes;
-using Xamarin.Forms.Internals;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
-using System;
+using Xamarin.Forms.CustomAttributes;
+using Xamarin.Forms.Internals;
+using System.Collections.Generic;
+using Xamarin.Forms.PlatformConfiguration;
+using Xamarin.Forms.PlatformConfiguration.WindowsSpecific;
 
 #if UITEST
-using Xamarin.UITest;
 using NUnit.Framework;
 #endif
 
@@ -14,65 +17,108 @@ namespace Xamarin.Forms.Controls.Issues
 	[Issue(IssueTracker.Bugzilla, 59718, "Multiple issues with listview and navigation in UWP", PlatformAffected.UWP)]
 	public class Bugzilla59718 : TestContentPage
 	{
-		Label _ItemSelectedLabel;
+		const string GoBackButtonId = "GoBackButtonId";
+		const string Target1 = "Label with TapGesture Cricket";
+		const string Target1b = "Label with TapGesture Cricket Tapped!";
+		const string Target2 = "Label with no TapGesture Cricket";
+		const string Target3 = "You came here from Cricket.";
+
 		Label _ItemTappedLabel;
+		Label _LabelTappedLabel;
 		ListView _list;
-		Label _tappedLabel;
+
+		class Grouping<K, T> : ObservableCollection<T>
+		{
+			public K Key { get; private set; }
+
+			public Grouping(K key, IEnumerable<T> items)
+			{
+				Key = key;
+				foreach (var item in items)
+					this.Items.Add(item);
+
+			}
+		}
 
 		protected override void Init()
 		{
-			_tappedLabel = new Label { AutomationId = "_tappedLabel", TextColor = Color.Red };
-			_ItemTappedLabel = new Label { AutomationId = "_itemTappedLabel", TextColor = Color.Purple };
-			_ItemSelectedLabel = new Label { AutomationId = "_ItemSelectedLabel", TextColor = Color.Blue };
+			_LabelTappedLabel = new Label { TextColor = Color.Red };
+			_ItemTappedLabel = new Label { TextColor = Color.Purple };
 
 			_list = new ListView
 			{
+				IsGroupingEnabled = true,
+				GroupDisplayBinding = new Binding("Key"),
 				ItemTemplate = new DataTemplate(() =>
 				{
-					var label = new Label { Text = "Tap me" };
+					var tapLabel = new Label();
+					tapLabel.SetBinding(Label.TextProperty, ".", stringFormat: "Label with TapGesture {0}");
+
 					var tap = new TapGestureRecognizer();
-					label.GestureRecognizers.Add(tap);
-					tap.Tapped += TapGestureRecognizer_Tapped;
-					var view = new ViewCell { View = label };
+					tap.Tapped += (s, e) =>
+					{
+						_LabelTappedLabel.Text = $"{tapLabel.Text} Tapped!";
+					};
+
+					tapLabel.GestureRecognizers.Add(tap);
+
+					var noTap = new Label();
+					noTap.SetBinding(Label.TextProperty, ".", stringFormat: "Label with no TapGesture {0}");
+
+					var view = new ViewCell { View = new StackLayout { Children = { noTap, tapLabel } } };
 					return view;
 				})
 			};
-			_list.ItemTapped += ListView_ItemTapped;
-			_list.ItemSelected += ListView_ItemSelected;
 
-			Content = new StackLayout { Children = { _tappedLabel, _ItemTappedLabel, _ItemSelectedLabel, _list } };
+			_list.On<Windows>().SelectionMode(ListViewSelectionMode.Inaccessible);
+
+			_list.ItemTapped += ListView_ItemTapped;
+
+			Content = new StackLayout { Children = { _LabelTappedLabel, _ItemTappedLabel, _list } };
 		}
 
 		protected override void OnAppearing()
 		{
-			_list.ItemsSource = Enumerable.Range(0, 100);
+			_list.ItemsSource = new ObservableCollection<Grouping<string, string>>
+			{
+				new Grouping<string, string>("Sports", new string[] {"Cricket", "Football" }),
+				new Grouping<string, string>("Mobile", new string[] {"Samsung", "Apple" }),
+				new Grouping<string, string>("Microsoft", new string[] {"Office", "Windows" }),
+				new Grouping<string, string>("Games", new string[] {"Online", "Offline" }),
+				new Grouping<string, string>("Test", new string[] {"test1", "test2" }),
+				new Grouping<string, string>("Variable", new string[] {"String", "Int" }),
+			}; ;
 
 			base.OnAppearing();
 		}
 
-		private void ListView_ItemSelected(object sender, SelectedItemChangedEventArgs e)
-		{
-			_ItemSelectedLabel.Text += $"ListView_ItemSelected: {e.SelectedItem}\r\n";
-		}
-
 		async void ListView_ItemTapped(object sender, ItemTappedEventArgs e)
 		{
-			_ItemTappedLabel.Text += $"_ItemTappedLabel: {e.Item}\r\n";
+			_ItemTappedLabel.Text = $"{e.Item}";
 
 			await Navigation.PushAsync(new NextPage(_ItemTappedLabel.Text));
-			((ListView)sender).SelectedItem = null;
-		}
 
-		void TapGestureRecognizer_Tapped(object sender, EventArgs e)
-		{
-			_tappedLabel.Text = "TapGestureRecognizer_Tapped: Tapped!";
+			((ListView)sender).SelectedItem = null;
 		}
 
 		class NextPage : ContentPage
 		{
-			public NextPage(string log)
+			public NextPage(string source)
 			{
-				Content = new Label { Text = log };
+				var button = new Button { Text = "Go back", AutomationId = GoBackButtonId };
+				button.Clicked += Button_Clicked;
+				Content = new StackLayout
+				{
+					Children = {
+						new Label { Text = $"You came here from {source}." },
+						button
+					}
+				};
+			}
+
+			async void Button_Clicked(object sender, System.EventArgs e)
+			{
+				await Navigation.PopAsync();
 			}
 		}
 
@@ -80,9 +126,20 @@ namespace Xamarin.Forms.Controls.Issues
 		[Test]
 		public void Bugzilla59718Test()
 		{
-			RunningApp.Screenshot("I am at Issue 1");
-			RunningApp.WaitForElement(q => q.Marked("IssuePageLabel"));
-			RunningApp.Screenshot("I see the Label");
+			RunningApp.WaitForElement(q => q.Marked(Target1));
+			RunningApp.Tap(q => q.Marked(Target1));
+
+			RunningApp.WaitForElement(q => q.Marked(Target1b));
+
+			RunningApp.WaitForElement(q => q.Marked(Target2));
+			RunningApp.Tap(q => q.Marked(Target2));
+
+			RunningApp.WaitForElement(q => q.Marked(Target3));
+
+			RunningApp.WaitForElement(q => q.Marked(GoBackButtonId));
+			RunningApp.Tap(q => q.Marked(GoBackButtonId));
+
+			RunningApp.WaitForElement(q => q.Marked(Target1));
 		}
 #endif
 	}
