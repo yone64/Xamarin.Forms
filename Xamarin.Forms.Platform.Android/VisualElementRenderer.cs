@@ -260,22 +260,22 @@ namespace Xamarin.Forms.Platform.Android
 
 			ElementChanged?.Invoke(this, e);
 
-			if (Forms.IsLollipopOrNewer)
+			UpdateElevation();
+		}
+
+		protected virtual void UpdateElevation()
+		{
+			if (Element == null || !Forms.IsLollipopOrNewer)
 			{
-				var iec = e.NewElement as IElementConfiguration<VisualElement>;
+				return;
+			}
 
-				if (iec == null)
-				{
-					return;
-				}
+			var iec = Element as IElementConfiguration<VisualElement>;
+			var elevation = iec?.On<PlatformConfiguration.Android>().GetElevation();
 
-				var android = iec.On<PlatformConfiguration.Android>();
-
-				var elevation = android.GetElevation();
-				if (elevation.HasValue)
-				{
-					Elevation = elevation.Value;
-				}
+			if (elevation != null)
+			{
+				Elevation = elevation.Value;
 			}
 		}
 
