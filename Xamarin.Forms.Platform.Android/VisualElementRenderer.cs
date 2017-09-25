@@ -5,8 +5,6 @@ using System.ComponentModel;
 using Android.Support.V4.View;
 using Android.Views;
 using Xamarin.Forms.Internals;
-using Xamarin.Forms.Platform.Android.FastRenderers;
-using Xamarin.Forms.PlatformConfiguration.AndroidSpecific;
 using AView = Android.Views.View;
 
 namespace Xamarin.Forms.Platform.Android
@@ -260,25 +258,9 @@ namespace Xamarin.Forms.Platform.Android
 
 			ElementChanged?.Invoke(this, e);
 
-			UpdateElevation();
+			ElevationHelper.SetElevation(this, e.NewElement);
 		}
-
-		protected virtual void UpdateElevation()
-		{
-			if (Element == null || !Forms.IsLollipopOrNewer)
-			{
-				return;
-			}
-
-			var iec = Element as IElementConfiguration<VisualElement>;
-			var elevation = iec?.On<PlatformConfiguration.Android>().GetElevation();
-
-			if (elevation != null)
-			{
-				Elevation = elevation.Value;
-			}
-		}
-
+		
 		protected virtual void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
 		{
 			if (e.PropertyName == VisualElement.BackgroundColorProperty.PropertyName)
