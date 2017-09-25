@@ -29,14 +29,14 @@ namespace Xamarin.Forms.Platform.Android
 
 			UpdateBackgroundColor();
 
-			if (Forms.IsLollipopOrNewer)
-			{
-				var elevation = e.NewElement.OnThisPlatform().GetElevation();
-				if (elevation.HasValue)
-				{
-					Elevation = elevation.Value;
-				}
-			}
+			//if (Forms.IsLollipopOrNewer)
+			//{
+			//	var elevation = e.NewElement.OnThisPlatform().GetElevation();
+			//	if (elevation.HasValue)
+			//	{
+			//		Elevation = elevation.Value;
+			//	}
+			//}
 		}
 
 		protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)

@@ -6,6 +6,7 @@ using Android.Support.V4.View;
 using Android.Views;
 using Xamarin.Forms.Internals;
 using Xamarin.Forms.Platform.Android.FastRenderers;
+using Xamarin.Forms.PlatformConfiguration.AndroidSpecific;
 using AView = Android.Views.View;
 
 namespace Xamarin.Forms.Platform.Android
@@ -258,6 +259,24 @@ namespace Xamarin.Forms.Platform.Android
 				handler(this, args);
 
 			ElementChanged?.Invoke(this, e);
+
+			if (Forms.IsLollipopOrNewer)
+			{
+				var iec = e.NewElement as IElementConfiguration<VisualElement>;
+
+				if (iec == null)
+				{
+					return;
+				}
+
+				var android = iec.On<PlatformConfiguration.Android>();
+
+				var elevation = android.GetElevation();
+				if (elevation.HasValue)
+				{
+					Elevation = elevation.Value;
+				}
+			}
 		}
 
 		protected virtual void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
