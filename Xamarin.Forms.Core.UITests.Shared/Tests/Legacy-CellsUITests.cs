@@ -283,7 +283,7 @@ namespace Xamarin.Forms.Core.UITests
 
 		protected override void TestTearDown()
 		{
-			App.NavigateBack();
+			App.Back();
 			base.TestTearDown();
 		}
 	}

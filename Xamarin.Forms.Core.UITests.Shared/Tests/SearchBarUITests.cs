@@ -33,7 +33,7 @@ namespace Xamarin.Forms.Core.UITests
 		// Implement control specific ui tests
 		protected override void FixtureTeardown ()
 		{
-			App.NavigateBack ();
+			App.Back ();
 			base.FixtureTeardown ();
 		}
 	}
