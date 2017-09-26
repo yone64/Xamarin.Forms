@@ -70,7 +70,7 @@ namespace Xamarin.Forms.Controls.Issues
 				})
 			};
 
-			_list.On<Windows>().SelectionMode(ListViewSelectionMode.Inaccessible);
+			_list.On<Windows>().SetSelectionMode(ListViewSelectionMode.Inaccessible);
 
 			_list.ItemTapped += ListView_ItemTapped;
 

@@ -34,13 +34,6 @@ namespace Xamarin.Forms.PlatformConfiguration.WindowsSpecific
 			return config;
 		}
 
-		public static IPlatformElementConfiguration<Windows, FormsElement> SelectionMode(
-			this IPlatformElementConfiguration<Windows, FormsElement> config, ListViewSelectionMode value)
-		{
-			SetSelectionMode(config, value);
-			return config;
-		}
-
 		#endregion
 	}
 
