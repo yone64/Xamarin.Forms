@@ -16,10 +16,8 @@ namespace Xamarin.Forms.Build.Tasks
 		internal static CodeDomProvider Provider = new CSharpCodeProvider();
 
 		[Required]
-		public string Source { get; set; }
-
+		public ITaskItem Source { get; set; }
 		public string Language { get; set; }
-
 		public string AssemblyName { get; set; }
 
 		[Output]
@@ -35,12 +33,13 @@ namespace Xamarin.Forms.Build.Tasks
 
 			Log.LogMessage("Source: {0}", Source);
 			Log.LogMessage("Language: {0}", Language);
+			Log.LogMessage("ResourceID: {0}", Source.GetMetadata("ManifestResourceName"));
 			Log.LogMessage("AssemblyName: {0}", AssemblyName);
 			Log.LogMessage("OutputFile {0}", OutputFile);
 
 			try
 			{
-				GenerateFile(Source, OutputFile);
+				GenerateFile(Source.ItemSpec, Source.GetMetadata("ManifestResourceName"), OutputFile);
 				return true;
 			}
 			catch (XmlException xe)
@@ -112,7 +111,7 @@ namespace Xamarin.Forms.Build.Tasks
 						new CodeAttributeArgument(new CodePrimitiveExpression("0.0.0.0")));
 
 		internal static void GenerateCode(string rootType, string rootNs, CodeTypeReference baseType,
-		                                  IEnumerable<CodeMemberField> namedFields, string xamlFile, string outFile)
+		                                  IEnumerable<CodeMemberField> namedFields, string xamlFile, string resourceId, string outFile)
 		{
 			if (rootType == null)
 			{
@@ -128,7 +127,10 @@ namespace Xamarin.Forms.Build.Tasks
 				IsPartial = true,
 				CustomAttributes = {
 					new CodeAttributeDeclaration(new CodeTypeReference($"global::{typeof(XamlFilePathAttribute).FullName}"),
-						 new CodeAttributeArgument(new CodePrimitiveExpression(xamlFile)))
+						 new CodeAttributeArgument(new CodePrimitiveExpression(xamlFile))),
+					new CodeAttributeDeclaration(new CodeTypeReference($"global::{typeof(XamlResourceIdAttribute).FullName}"),
+					                             new CodeAttributeArgument(new CodePrimitiveExpression(rootNs)),
+					                             new CodeAttributeArgument(new CodePrimitiveExpression(resourceId))),
 				}
 			};
 			declType.BaseTypes.Add(baseType);
@@ -166,7 +168,7 @@ namespace Xamarin.Forms.Build.Tasks
 				Provider.GenerateCodeFromCompileUnit(ccu, writer, new CodeGeneratorOptions());
 		}
 
-		internal static void GenerateFile(string xamlFile, string outFile)
+		internal static void GenerateFile(string xamlFile, string resourceId, string outFile)
 		{
 			string rootType, rootNs;
 			CodeTypeReference baseType;
@@ -175,7 +177,7 @@ namespace Xamarin.Forms.Build.Tasks
 			using (StreamReader reader = File.OpenText(xamlFile))
 				ParseXaml(reader, out rootType, out rootNs, out baseType, out namedFields);
 
-			GenerateCode(rootType, rootNs, baseType, namedFields, Path.GetFullPath(xamlFile), outFile);
+			GenerateCode(rootType, rootNs, baseType, namedFields, Path.GetFullPath(xamlFile), resourceId, outFile);
 		}
 
 		static IEnumerable<CodeMemberField> GetCodeMemberFields(XmlNode root, XmlNamespaceManager nsmgr)

@@ -11,36 +11,11 @@
 
 	<Import Project="$(MSBuildThisFileDirectory)Xamarin.Forms.DefaultItems.targets" Condition="'$(MSBuildSDKsPath)'!=''" />
 
-	<PropertyGroup>
-		<CoreCompileDependsOn>
-			XamlG;
-			$(CoreCompileDependsOn);
-		</CoreCompileDependsOn>
-	</PropertyGroup>
-
-	<PropertyGroup>
-		<CompileDependsOn>
-			$(CompileDependsOn);
-			XamlC;
-		</CompileDependsOn>
-	</PropertyGroup>
-
 	<ItemGroup>
 		<ProjectCapability Include="XamarinForms" />
 	</ItemGroup>
 
-	<Target Name="UpdateDesignTimeXaml" DependsOnTargets="XamlG"/>
-
-	<Target Name="XamlG" DependsOnTargets="$(XamlGDependsOn)"/>
-
-	<PropertyGroup>
-		<XamlGDependsOn>
-			_PreXamlG;
-			_CollectXamlFiles;
-			_CoreXamlG;
-		</XamlGDependsOn>
-	</PropertyGroup>
-
+	<!-- Check Tasks ABI -->
 	<PropertyGroup>
 		<_XFTargetsImportedAgain Condition="'$(_XFTargetsImported)'=='True'">True</_XFTargetsImportedAgain>
 		<_XFTargetsImported>True</_XFTargetsImported>
@@ -57,7 +32,7 @@
 		</GetTasksAbi >
 
 		<PropertyGroup>
-			<_XFTasksExpectedAbi>1</_XFTasksExpectedAbi>
+			<_XFTasksExpectedAbi>2</_XFTasksExpectedAbi>
 		</PropertyGroup>
 
 		<Error
@@ -65,6 +40,22 @@
 			Code="XF002"
 			Condition="'$(_XFTasksAbi)' != '$(_XFTasksExpectedAbi)'" />
 	</Target>
+
+	<!-- XamlG -->
+	<Target Name="UpdateDesignTimeXaml" DependsOnTargets="XamlG"/>
+	<Target Name="XamlG" DependsOnTargets="$(XamlGDependsOn)"/>
+
+	<PropertyGroup>
+		<CoreCompileDependsOn>
+			XamlG;
+			$(CoreCompileDependsOn);
+		</CoreCompileDependsOn>
+		<XamlGDependsOn>
+			_PreXamlG;
+			_CollectXamlFiles;
+			_CoreXamlG;
+		</XamlGDependsOn>
+	</PropertyGroup>
 
 	<Target Name="_PreXamlG">
 		<MakeDir Directories="$(IntermediateOutputPath)"/>
@@ -94,6 +85,14 @@
 			OutputFile = "$(IntermediateOutputPath)%(ManifestResourceName).g$(DefaultLanguageSourceExtension)">
 		</XamlGTask>
 	</Target>
+
+	<!-- XamlC -->
+	<PropertyGroup>
+		<CompileDependsOn>
+			$(CompileDependsOn);
+			XamlC;
+		</CompileDependsOn>
+	</PropertyGroup>
 
 	<PropertyGroup>
 		<XFVerbosity Condition="'$(XFVerbosity)' == ''">2</XFVerbosity>
