@@ -49,18 +49,6 @@ namespace Xamarin.Forms.Platform.Android
 			return base.OnInterceptTouchEvent(ev);
 		}
 
-		{
-			if (InputTransparent)
-			{
-				// If the Element is InputTransparent, this ViewGroup will be marked InputTransparent
-				// If we're InputTransparent we should return false on all touch events without
-				// even bothering to send them to the child Views
-					() => new ScaleGestureDetector(Context, new InnerScaleListener(_pinchGestureHandler.OnPinch, _pinchGestureHandler.OnPinchStarted, _pinchGestureHandler.OnPinchEnded))
-			}
-
-			return base.DispatchTouchEvent(e);
-		}
-
 		[Obsolete("This constructor is obsolete as of version 3.0. Please use VisualElementRenderer(Context) instead.")]
 		protected VisualElementRenderer() : this(Forms.Context)
 		{

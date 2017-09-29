@@ -563,14 +563,16 @@ namespace Xamarin.Forms.ControlGallery.Android
 		}
 	}
 
+
 	//public class HintLabel : Xamarin.Forms.Platform.Android.AppCompat.LabelRenderer
 	//{
 	//	public HintLabel()
 	//	{
 	//		Hint = AndroidHelpText.HintLabel.Success;
 	//	}
- // }
- 
+	// }
+
+#pragma warning disable CS0618 // Leaving in old constructor so we can verify it works
 	public class NoFlashTestNavigationPage 
 #if FORMS_APPLICATION_ACTIVITY
 		: Xamarin.Forms.Platform.Android.NavigationRenderer
@@ -585,7 +587,9 @@ namespace Xamarin.Forms.ControlGallery.Android
 		}
 #endif
 	}
+#pragma warning restore CS0618 // Type or member is obsolete
 
+#pragma warning disable CS0618 // Leaving in old constructor so we can verify it works
 	public class QuickCollectNavigationPage
 #if FORMS_APPLICATION_ACTIVITY
 		: Xamarin.Forms.Platform.Android.NavigationRenderer
@@ -640,5 +644,6 @@ namespace Xamarin.Forms.ControlGallery.Android
 			base.Dispose(disposing);
 		}
 	}
+#pragma warning restore CS0618 // Type or member is obsolete
 }
 

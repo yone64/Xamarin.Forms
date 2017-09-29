@@ -11,27 +11,7 @@ namespace Xamarin.Forms.Platform.Android
 		readonly Func<double, double> _fromPixels;
 		Func<Point, bool> _pinchStartedDelegate;
 
-		public InnerScaleListener(Func<float, Point, bool> pinchDelegate, Func<Point, bool> pinchStarted, 
-			Action pinchEnded, Func<double, double> fromPixels)
-		{
-			if (pinchDelegate == null)
-				throw new ArgumentNullException("pinchDelegate");
-
-			if (pinchStarted == null)
-				throw new ArgumentNullException("pinchStarted");
-
-			if (pinchEnded == null)
-				throw new ArgumentNullException("pinchEnded");
-
-			_pinchDelegate = pinchDelegate;
-			_pinchStartedDelegate = pinchStarted;
-			_pinchEndedDelegate = pinchEnded;
-			_fromPixels = fromPixels;
-		}
-
-		[Obsolete("This constructor is obsolete as of version 3.0. Please use " 
-			+ "InnerScaleListener(Func<float, Point, bool>, Func<Point, bool>, Action, Func<double, double>) instead.")]
-		public InnerScaleListener(PinchGestureHandler pinchGestureHandler)
+		public InnerScaleListener(PinchGestureHandler pinchGestureHandler, Func<double, double> fromPixels)
 		{
 			if (pinchGestureHandler == null)
 			{
@@ -41,6 +21,7 @@ namespace Xamarin.Forms.Platform.Android
 			_pinchDelegate = pinchGestureHandler.OnPinch;
 			_pinchStartedDelegate = pinchGestureHandler.OnPinchStarted;
 			_pinchEndedDelegate = pinchGestureHandler.OnPinchEnded;
+			_fromPixels = fromPixels;
 		}
 
 		// This is needed because GestureRecognizer callbacks can be delayed several hundred milliseconds
