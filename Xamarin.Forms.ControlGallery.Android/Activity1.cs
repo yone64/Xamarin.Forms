@@ -139,7 +139,8 @@ namespace Xamarin.Forms.ControlGallery.Android
 		[Export("NavigateToTest")]
 		public bool NavigateToTest(string test)
 		{
-			return _app.NavigateToTestPage(test);
+			return false; // Experimenting to see if the old nav method will work in the recalcitrant VTST lane
+			//return _app.NavigateToTestPage(test);
 		}
 
 		[Export("Reset")]
