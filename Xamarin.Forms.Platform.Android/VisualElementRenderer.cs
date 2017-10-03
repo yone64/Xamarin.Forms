@@ -49,6 +49,20 @@ namespace Xamarin.Forms.Platform.Android
 			return base.OnInterceptTouchEvent(ev);
 		}
 
+		public override bool DispatchTouchEvent(MotionEvent e)
+		{
+			if (InputTransparent)
+			{
+				// If the Element is InputTransparent, this ViewGroup will be marked InputTransparent
+				// If we're InputTransparent we should return false on all touch events without
+				// even bothering to send them to the child Views
+
+				return false; // IOW, not handled
+			}
+
+			return base.DispatchTouchEvent(e);
+		}		  		
+
 		[Obsolete("This constructor is obsolete as of version 3.0. Please use VisualElementRenderer(Context) instead.")]
 		protected VisualElementRenderer() : this(Forms.Context)
 		{
