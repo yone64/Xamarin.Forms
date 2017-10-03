@@ -46,7 +46,7 @@ namespace Xamarin.Forms.Controls.Issues
 			RunningApp.Tap(RestartButton);
 
 			// If the app hasn't crashed, this test has passed
-			RunningApp.WaitForElement(Success);
+			RunningApp.WaitForElement("Android CoreGallery");
 		}
 #endif
 	}
