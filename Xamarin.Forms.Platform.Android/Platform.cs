@@ -308,7 +308,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		public static IVisualElementRenderer CreateRenderer(VisualElement element, Context context)
 		{
-			IVisualElementRenderer renderer = Registrar.Registered.GetHandler<IVisualElementRenderer>(element.GetType()) 
+			IVisualElementRenderer renderer = Registrar.Registered.GetHandler<IVisualElementRenderer>(element.GetType(), context) 
 				?? new DefaultRenderer(context);
 			renderer.SetElement(element);
 
@@ -345,7 +345,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		internal static IVisualElementRenderer CreateRenderer(VisualElement element, FragmentManager fragmentManager, Context context)
 		{
-			IVisualElementRenderer renderer = Registrar.Registered.GetHandler<IVisualElementRenderer>(element.GetType()) ?? new DefaultRenderer(context);
+			IVisualElementRenderer renderer = Registrar.Registered.GetHandler<IVisualElementRenderer>(element.GetType(), context) ?? new DefaultRenderer(context);
 
 			var managesFragments = renderer as IManageFragments;
 			managesFragments?.SetFragmentManager(fragmentManager);
