@@ -224,8 +224,8 @@ namespace Xamarin.Forms.Platform.Android
 		protected override void OnScrollChanged(int l, int t, int oldl, int oldt)
 		{
 			base.OnScrollChanged(l, t, oldl, oldt);
-
-			UpdateScrollPosition(Context.FromPixels(l), Context.FromPixels(t));
+			var context = Context;
+			UpdateScrollPosition(context.FromPixels(l), context.FromPixels(t));
 		}
 
 		internal void UpdateScrollPosition(double x, double y)
@@ -234,11 +234,13 @@ namespace Xamarin.Forms.Platform.Android
 			{
 				if (_view.Orientation == ScrollOrientation.Both)
 				{
+					var context = Context;
+
 					if (x == 0)
-						x = Context.FromPixels(_hScrollView.ScrollX);
+						x = context.FromPixels(_hScrollView.ScrollX);
 
 					if (y == 0)
-						y = Context.FromPixels(ScrollY);
+						y = context.FromPixels(ScrollY);
 				}
 
 				Controller.SetScrolledPosition(x, y);
@@ -313,16 +315,17 @@ namespace Xamarin.Forms.Platform.Android
 					break;
 			}
 
-			var x = (int)Context.ToPixels(e.ScrollX);
-			var y = (int)Context.ToPixels(e.ScrollY);
+			var context = Context;
+			var x = (int)context.ToPixels(e.ScrollX);
+			var y = (int)context.ToPixels(e.ScrollY);
 			int currentX = _view.Orientation == ScrollOrientation.Horizontal || _view.Orientation == ScrollOrientation.Both ? _hScrollView.ScrollX : ScrollX;
 			int currentY = _view.Orientation == ScrollOrientation.Vertical || _view.Orientation == ScrollOrientation.Both ? ScrollY : _hScrollView.ScrollY;
 			if (e.Mode == ScrollToMode.Element)
 			{
 				Point itemPosition = Controller.GetScrollPositionForElement(e.Element as VisualElement, e.Position);
 
-				x = (int)Context.ToPixels(itemPosition.X);
-				y = (int)Context.ToPixels(itemPosition.Y);
+				x = (int)context.ToPixels(itemPosition.X);
+				y = (int)context.ToPixels(itemPosition.Y);
 			}
 			if (e.ShouldAnimate)
 			{
