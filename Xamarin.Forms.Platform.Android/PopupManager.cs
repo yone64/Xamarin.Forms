@@ -23,7 +23,7 @@ namespace Xamarin.Forms.Platform.Android
 
 		internal static void Unsubscribe(Context context)
 		{
-			var toRemove = s_subscriptions.Where(s => s.Activity == context);
+			var toRemove = s_subscriptions.Where(s => s.Activity == context).ToList();
 			foreach (PopupRequestHelper popupRequestHelper in toRemove)
 			{
 				popupRequestHelper.Dispose();
