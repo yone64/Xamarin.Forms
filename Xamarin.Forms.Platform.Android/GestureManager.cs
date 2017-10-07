@@ -49,7 +49,7 @@ namespace Xamarin.Forms.Platform.Android
 			}
 
 			var eventConsumed = false;
-			if (ViewHasPinchGestures())
+			if (e.PointerCount > 1 && ViewHasPinchGestures())
 			{
 				eventConsumed = _scaleDetector.Value.OnTouchEvent(e);
 			}
