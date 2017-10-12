@@ -1,5 +1,6 @@
 using System;
 using Android.Content;
+using Android.Views;
 using Xamarin.Forms;
 using Xamarin.Forms.ControlGallery.Android;
 using Xamarin.Forms.Controls.Issues;
@@ -9,7 +10,7 @@ using Xamarin.Forms.Platform.Android;
 
 namespace Xamarin.Forms.ControlGallery.Android
 {
-	public class _60122ImageRenderer : ImageRenderer
+	public class _60122ImageRenderer : ImageRenderer 
 	{
 		public _60122ImageRenderer(Context context) : base(context)
 		{
@@ -29,12 +30,15 @@ namespace Xamarin.Forms.ControlGallery.Android
 			if (e.NewElement != null)
 			{
 				_customControl = e.NewElement as Bugzilla60122._60122Image;
+			
 				LongClick += LongPressGestureRecognizerImageRenderer_LongClick;
 			}
 			else
 			{
-				LongClick += LongPressGestureRecognizerImageRenderer_LongClick;
+				LongClick -= LongPressGestureRecognizerImageRenderer_LongClick;
 			}
+
+			SetBackgroundColor(Color.Bisque.ToAndroid());
 		}
 	}
 }
