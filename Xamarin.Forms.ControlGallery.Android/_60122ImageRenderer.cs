@@ -37,8 +37,6 @@ namespace Xamarin.Forms.ControlGallery.Android
 			{
 				LongClick -= LongPressGestureRecognizerImageRenderer_LongClick;
 			}
-
-			SetBackgroundColor(Color.Bisque.ToAndroid());
 		}
 	}
 }
