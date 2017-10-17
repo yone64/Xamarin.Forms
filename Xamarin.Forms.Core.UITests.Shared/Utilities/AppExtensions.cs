@@ -16,7 +16,7 @@ namespace Xamarin.Forms.Core.UITests
 
 		public static void NavigateBack (this IApp app)
 		{
-			app.Tap (Queries.NavigationBarBackButton ());
+			app.Back();
 		}
 
 		public static void NavigateToGallery (this IApp app, string page)
