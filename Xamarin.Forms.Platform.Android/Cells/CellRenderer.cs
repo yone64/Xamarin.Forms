@@ -21,10 +21,12 @@ namespace Xamarin.Forms.Platform.Android
 
 		protected Cell Cell { get; set; }
 
+		protected IViewController ViewController => ParentView;
+
 		public AView GetCell(Cell item, AView convertView, ViewGroup parent, Context context)
 		{
 			Performance.Start();
-			
+
 			Cell = item;
 			Cell.PropertyChanged -= PropertyChangedHandler;
 
@@ -34,7 +36,7 @@ namespace Xamarin.Forms.Platform.Android
 			{
 				Object tag = convertView.Tag;
 				CellRenderer renderer = (tag as RendererHolder)?.Renderer;
-				
+
 				Cell oldCell = renderer?.Cell;
 
 				if (oldCell != null)
@@ -59,6 +61,7 @@ namespace Xamarin.Forms.Platform.Android
 				holder.Renderer = this;
 
 			Cell.PropertyChanged += PropertyChangedHandler;
+
 			((ICellController)Cell).SendAppearing();
 
 			Performance.Stop();
@@ -93,7 +96,7 @@ namespace Xamarin.Forms.Platform.Android
 			ICellController cellController = cell;
 			cellController.ForceUpdateSizeRequested -= _onForceUpdateSizeRequested;
 
-			_onForceUpdateSizeRequested = (sender, e) => 
+			_onForceUpdateSizeRequested = (sender, e) =>
 			{
 				// RenderHeight may not be changed, but that's okay, since we
 				// don't actually use the height argument in the OnMeasure override.

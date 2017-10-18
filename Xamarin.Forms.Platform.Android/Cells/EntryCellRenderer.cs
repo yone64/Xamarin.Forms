@@ -3,6 +3,7 @@ using Android.Content;
 using Android.Text;
 using Android.Text.Method;
 using Android.Views;
+using Android.OS;
 
 namespace Xamarin.Forms.Platform.Android
 {
@@ -29,6 +30,7 @@ namespace Xamarin.Forms.Platform.Android
 			UpdateText();
 			UpdateIsEnabled();
 			UpdateHeight();
+			UpdateLayoutDirection();
 
 			_view.TextChanged = OnTextChanged;
 			_view.EditingCompleted = OnEditingCompleted;
@@ -56,6 +58,9 @@ namespace Xamarin.Forms.Platform.Android
 				UpdateIsEnabled();
 			else if (e.PropertyName == "RenderHeight")
 				UpdateHeight();
+			else if (e.PropertyName == Xamarin.Forms.View.FlowDirectionProperty.PropertyName) //TODO: Probably not
+				UpdateLayoutDirection();
+
 		}
 
 		protected virtual NumberKeyListener GetDigitsKeyListener(InputTypes inputTypes)
@@ -86,7 +91,11 @@ namespace Xamarin.Forms.Platform.Android
 		void UpdateHorizontalTextAlignment()
 		{
 			var entryCell = (EntryCell)Cell;
-			_view.EditText.Gravity = entryCell.HorizontalTextAlignment.ToHorizontalGravityFlags();
+
+			if ((int)Build.VERSION.SdkInt < 17)
+				_view.EditText.Gravity = entryCell.HorizontalTextAlignment.ToHorizontalGravityFlags();
+			else
+				_view.EditText.TextAlignment = entryCell.HorizontalTextAlignment.ToTextAlignment();
 		}
 
 		void UpdateIsEnabled()
@@ -115,6 +124,17 @@ namespace Xamarin.Forms.Platform.Android
 		void UpdateLabelColor()
 		{
 			_view.SetLabelTextColor(((EntryCell)Cell).LabelColor, global::Android.Resource.Color.PrimaryTextDark);
+		}
+
+		void UpdateLayoutDirection()
+		{
+			if (ViewController == null || (int)Build.VERSION.SdkInt < 17)
+				return;
+
+			if (ViewController.EffectiveFlowDirection.HasFlag(EffectiveFlowDirection.RightToLeft))
+				_view.LayoutDirection = LayoutDirection.Rtl;
+			else if (ViewController.EffectiveFlowDirection.HasFlag(EffectiveFlowDirection.LeftToRight))
+				_view.LayoutDirection = LayoutDirection.Ltr;
 		}
 
 		void UpdatePlaceholder()

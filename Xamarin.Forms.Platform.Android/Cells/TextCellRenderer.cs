@@ -4,6 +4,7 @@ using Android.Views;
 using AView = Android.Views.View;
 using AColor = Android.Graphics.Color;
 using Xamarin.Forms.Internals;
+using Android.OS;
 
 namespace Xamarin.Forms.Platform.Android
 {
@@ -20,6 +21,7 @@ namespace Xamarin.Forms.Platform.Android
 			UpdateDetailText();
 			UpdateHeight();
 			UpdateIsEnabled();
+			UpdateLayoutDirection();
 			View.SetImageVisible(false);
 
 			return View;
@@ -35,6 +37,8 @@ namespace Xamarin.Forms.Platform.Android
 				UpdateIsEnabled();
 			else if (args.PropertyName == "RenderHeight")
 				UpdateHeight();
+			else if (args.PropertyName == Xamarin.Forms.View.FlowDirectionProperty.PropertyName) //TODO: Probably not
+				UpdateLayoutDirection();
 		}
 
 		void UpdateDetailText()
@@ -53,6 +57,17 @@ namespace Xamarin.Forms.Platform.Android
 		{
 			var cell = (TextCell)Cell;
 			View.SetIsEnabled(cell.IsEnabled);
+		}
+
+		void UpdateLayoutDirection()
+		{
+			if (ViewController == null || (int)Build.VERSION.SdkInt < 17)
+				return;
+
+			if (ViewController.EffectiveFlowDirection.HasFlag(EffectiveFlowDirection.RightToLeft))
+				View.LayoutDirection = LayoutDirection.Rtl;
+			else if (ViewController.EffectiveFlowDirection.HasFlag(EffectiveFlowDirection.LeftToRight))
+				View.LayoutDirection = LayoutDirection.Ltr;
 		}
 
 		void UpdateMainText()
