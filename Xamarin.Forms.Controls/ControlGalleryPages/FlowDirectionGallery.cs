@@ -75,36 +75,59 @@ namespace Xamarin.Forms.Controls
 			btn.Text = "Some text";
 
 			var date = AddView<DatePicker>(grid, ref col, ref row, hOptions, vOptions, margin);
+			date.WidthRequest = 75;
 
 			var edit = AddView<Editor>(grid, ref col, ref row, hOptions, vOptions, margin);
-			edit.Text = "Some text";
+			edit.WidthRequest = 100;
+			edit.Text = "Some longer text for wrapping";
 
 			var entry = AddView<Entry>(grid, ref col, ref row, hOptions, vOptions, margin);
+			entry.WidthRequest = 100;
 			entry.Text = "Some text";
 
 			var image = AddView<Image>(grid, ref col, ref row, hOptions, vOptions, margin);
 			image.Source = "oasis.jpg";
 
 			var lbl = AddView<Label>(grid, ref col, ref row, hOptions, vOptions, margin);
+			lbl.WidthRequest = 100;
 			lbl.Text = "Some text";
 
-			var ogv = AddView<OpenGLView>(grid, ref col, ref row, hOptions, vOptions, margin);
+			//var ogv = AddView<OpenGLView>(grid, ref col, ref row, hOptions, vOptions, margin);
 
 			var pkr = AddView<Picker>(grid, ref col, ref row, hOptions, vOptions, margin);
 			pkr.ItemsSource = Enumerable.Range(0, 10).ToList();
 
 			var sld = AddView<Slider>(grid, ref col, ref row, hOptions, vOptions, margin);
+			sld.WidthRequest = 100;
+			sld.Maximum = 10;
+			Device.StartTimer(TimeSpan.FromSeconds(1), () =>
+			{
+				sld.Value += 1;
+				if (sld.Value == 10d)
+					sld.Value = 0;
+				return true;
+			});
 
 			var stp = AddView<Stepper>(grid, ref col, ref row, hOptions, vOptions, margin);
 
 			var swt = AddView<Switch>(grid, ref col, ref row, hOptions, vOptions, margin);
 
 			var time = AddView<TimePicker>(grid, ref col, ref row, hOptions, vOptions, margin);
+			time.WidthRequest = 75;
 
 			var prog = AddView<ProgressBar>(grid, ref col, ref row, hOptions, vOptions, margin, 2);
-			prog.Progress = 50;
+			prog.WidthRequest = 200;
+			prog.BackgroundColor = Color.DarkGray;
+			Device.StartTimer(TimeSpan.FromSeconds(1), () =>
+			{
+				prog.Progress += .1;
+				if (prog.Progress == 1d)
+					prog.Progress = 0;
+				return true;
+			});
 
 			var srch = AddView<SearchBar>(grid, ref col, ref row, hOptions, vOptions, margin, 2);
+			srch.WidthRequest = 200;
 			srch.Text = "Some text";
 
 			var tbl = new TableView
