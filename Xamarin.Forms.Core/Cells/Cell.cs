@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Xamarin.Forms
 {
-	public abstract class Cell : Element, ICellController
+	public abstract class Cell : Element, ICellController, IFlowDirectionController
 	{
 		public const int DefaultCellHeight = 40;
 		public static readonly BindableProperty IsEnabledProperty = BindableProperty.Create("IsEnabled", typeof(bool), typeof(Cell), true, propertyChanged: OnIsEnabledPropertyChanged);
@@ -17,6 +17,9 @@ namespace Xamarin.Forms
 		double _height = -1;
 
 		bool _nextCallToForceUpdateSizeQueued;
+
+		EffectiveFlowDirection IFlowDirectionController.EffectiveFlowDirection { get; set; } = EffectiveFlowDirection.LeftToRight | EffectiveFlowDirection.Implicit;
+		IFlowDirectionController FlowController => this;
 
 		public IList<MenuItem> ContextActions
 		{
@@ -74,6 +77,8 @@ namespace Xamarin.Forms
 				return DefaultCellHeight;
 			}
 		}
+
+		double IFlowDirectionController.Width => (Parent as VisualElement)?.Width ?? 0;
 
 		public event EventHandler Appearing;
 
@@ -136,6 +141,8 @@ namespace Xamarin.Forms
 			}
 
 			base.OnParentSet();
+
+			FlowController.NotifyFlowDirectionChanged();
 		}
 
 		protected override void OnPropertyChanging(string propertyName = null)
@@ -170,6 +177,19 @@ namespace Xamarin.Forms
 			var container = RealParent as ListView;
 			if (container != null)
 				container.SendCellDisappearing(this);
+		}
+
+		void IFlowDirectionController.NotifyFlowDirectionChanged()
+		{
+			SetFlowDirectionFromParent(this);
+
+			foreach (var element in LogicalChildren)
+			{
+				var view = element as IFlowDirectionController;
+				if (view == null)
+					continue;
+				view.NotifyFlowDirectionChanged();
+			}
 		}
 
 		void OnContextActionsChanged(object sender, NotifyCollectionChangedEventArgs e)
