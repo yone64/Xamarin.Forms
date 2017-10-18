@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using Xamarin.Forms.Controls;
 using Xamarin.Forms.CustomAttributes;
 
 using Xamarin.UITest.Queries;
@@ -38,8 +39,13 @@ namespace Xamarin.Forms.Core.UITests
 		{
 			App.NavigateToGallery(GalleryQueries.ToolbarItemGallery);
 #if __IOS__
-			btn1Id = "toolbaritem_primary";
-			btn4Id = "toolbaritem_secondary2";
+			btn1Id = "menuIcon";
+			btn4Id = "tb4";
+			if (AppSetup.iOSVersion  >= 9)
+			{
+				btn1Id = "toolbaritem_primary";
+				btn4Id = "toolbaritem_secondary2";
+			}
 #endif
 		}
 
