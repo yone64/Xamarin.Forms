@@ -22,8 +22,6 @@ namespace Xamarin.Forms.Platform.Android
 			base.OnCellPropertyChanged(sender, args);
 			if (args.PropertyName == ImageCell.ImageSourceProperty.PropertyName)
 				UpdateImage();
-			else if (args.PropertyName == Xamarin.Forms.View.FlowDirectionProperty.PropertyName) //TODO: Probably not
-				UpdateLayoutDirection();
 		}
 
 		void UpdateImage()

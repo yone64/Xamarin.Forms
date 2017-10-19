@@ -58,9 +58,6 @@ namespace Xamarin.Forms.Platform.Android
 				UpdateIsEnabled();
 			else if (e.PropertyName == "RenderHeight")
 				UpdateHeight();
-			else if (e.PropertyName == Xamarin.Forms.View.FlowDirectionProperty.PropertyName) //TODO: Probably not
-				UpdateLayoutDirection();
-
 		}
 
 		protected virtual NumberKeyListener GetDigitsKeyListener(InputTypes inputTypes)
