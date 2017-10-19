@@ -5,6 +5,8 @@ namespace Xamarin.Forms.Controls
 {
 	public class FlowDirectionGallery : ContentPage
 	{
+		FlowDirection DeviceDirection = Device.Info.CurrentFlowDirection;
+
 		public FlowDirectionGallery()
 		{
 			var hOptions = LayoutOptions.Start;
@@ -29,7 +31,10 @@ namespace Xamarin.Forms.Controls
 				}
 			});
 
-			var flipButton = new Button { Text = "Switch to Left To Right" };
+			var flipButton = new Button
+			{
+				Text = DeviceDirection == FlowDirection.RightToLeft ? "Switch to Left To Right" : "Switch to Right To Left"
+			};
 			flipButton.Clicked += (s, e) =>
 			{
 				if (Content.FlowDirection == FlowDirection.LeftToRight || Content.FlowDirection == FlowDirection.MatchParent)
@@ -161,7 +166,7 @@ namespace Xamarin.Forms.Controls
 			Content = new ScrollView
 			{
 				Content = stack,
-				FlowDirection = FlowDirection.RightToLeft
+				FlowDirection = DeviceDirection
 			};
 		}
 
