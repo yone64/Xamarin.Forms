@@ -20,6 +20,7 @@ using Xamarin.Forms.Internals;
 using Xamarin.Forms.Platform.Android;
 using Resource = Android.Resource;
 using Trace = System.Diagnostics.Trace;
+using ALayoutDirection = Android.Views.LayoutDirection;
 
 namespace Xamarin.Forms
 {
@@ -234,6 +235,7 @@ namespace Xamarin.Forms
 			readonly double _scalingFactor;
 
 			Orientation _previousOrientation = Orientation.Undefined;
+			ALayoutDirection _previousFlowDirection = ALayoutDirection.Inherit;
 
 			public AndroidDeviceInfo(Context formsActivity)
 			{
@@ -245,6 +247,7 @@ namespace Xamarin.Forms
 				}
 
 				CheckOrientationChanged(formsActivity.Resources.Configuration.Orientation);
+				CheckFlowDirectionChanged(formsActivity.Resources.Configuration.LayoutDirection);
 
 				// This will not be an implementation of IDeviceInfoProvider when running inside the context
 				// of layoutlib, which is what the Android Designer does.
@@ -295,9 +298,19 @@ namespace Xamarin.Forms
 				_previousOrientation = orientation;
 			}
 
+
+			void CheckFlowDirectionChanged(ALayoutDirection flowDirection)
+			{
+				if (!_previousFlowDirection.Equals(flowDirection))
+					CurrentFlowDirection = flowDirection.ToFlowDirection();
+
+				_previousFlowDirection = flowDirection;
+			}
+
 			void ConfigurationChanged(object sender, EventArgs e)
 			{
 				CheckOrientationChanged(_formsActivity.Resources.Configuration.Orientation);
+				CheckFlowDirectionChanged(_formsActivity.Resources.Configuration.LayoutDirection);
 			}
 		}
 

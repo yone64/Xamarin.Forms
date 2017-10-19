@@ -1,6 +1,7 @@
 ﻿using Android.Content.Res;
 using Android.Views;
 using Xamarin.Forms.Internals;
+using ALayoutDirection = Android.Views.LayoutDirection;
 
 namespace Xamarin.Forms.Platform.Android
 {
@@ -35,6 +36,19 @@ namespace Xamarin.Forms.Platform.Android
 					return DeviceOrientation.Portrait;
 				default:
 					return DeviceOrientation.Other;
+			}
+		}
+
+		internal static FlowDirection ToFlowDirection(this ALayoutDirection direction)
+		{
+			switch (direction)
+			{
+				case ALayoutDirection.Ltr:
+					return FlowDirection.LeftToRight;
+				case ALayoutDirection.Rtl:
+					return FlowDirection.RightToLeft;
+				default:
+					return FlowDirection.MatchParent;
 			}
 		}
 	}
